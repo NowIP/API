@@ -1,4 +1,4 @@
-import { BasicInMemoryDNSZoneStore, DNSRecords, DNSServer as Server,  } from 'better-dns';
+import { BasicInMemoryDNSZoneStore, DNSRecords, DNSServer as Server } from 'better-dns';
 import { Logger } from '../utils/logger';
 
 interface DNSServerSettings {

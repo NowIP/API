@@ -25,6 +25,11 @@ export const domainsTable = sqliteTable('domains', {
     domainName: text().notNull().unique()
 });
 
+export const systemConfigsTable = sqliteTable('system_configs', {
+    key: text().primaryKey(),
+    value: text().notNull()
+});
+
 // export const TableSchema = {
 //     usersTable,
 //     domainsTable,

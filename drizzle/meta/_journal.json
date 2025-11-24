@@ -5,15 +5,8 @@
     {
       "idx": 0,
       "version": "6",
-      "when": 1764004200592,
-      "tag": "0000_cooing_fixer",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "6",
-      "when": 1764004294060,
-      "tag": "0001_wild_jackpot",
+      "when": 1764015730046,
+      "tag": "0000_shiny_mach_iv",
       "breakpoints": true
     }
   ]
