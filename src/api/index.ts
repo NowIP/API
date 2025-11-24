@@ -4,6 +4,7 @@ import { ddns2 } from "./modules/ddns2";
 import { Logger } from "../utils/logger";
 import openapi, { fromTypes } from "@elysiajs/openapi";
 import z from "zod";
+import { authMiddleware } from "./middleware/auth";
 
 const routes = {
     ddns2: (await import('./modules/ddns2')).ddns2,
@@ -22,7 +23,8 @@ export class API {
 					zod: z.toJSONSchema
 				}
 			}))
-			.use(routes.ddns2);
+			.use(authMiddleware)
+			.use(routes.ddns2);	
 
 		if (hostname === "::" || hostname === "0.0.0.0") {
 			app = app.listen({ port, hostname: "0.0.0.0" }).listen({ port, hostname: "::" });
