@@ -11,11 +11,13 @@ interface DNSServerSettings {
 
 export class DNSServer {
 
-    protected static server: Server;
+    protected static server: Server | null = null;
 
-    protected static settings: DNSServerSettings;
+    protected static settings: DNSServerSettings | null = null;
 
     static async init(settings: DNSServerSettings) {
+
+        this.settings = settings;
 
         const dnsRecordStore = new BasicInMemoryDNSZoneStore({
             nsDomain: "ns." + settings.rootDomain,
@@ -31,8 +33,16 @@ export class DNSServer {
     }
 
     static async start() {
+
+        if (!this.settings) {
+            throw new Error('DNS Server settings not set. Call DNSServer.init() first.');
+        }
+        if (!this.server) {
+            throw new Error('DNS Server not initialized. Call DNSServer.init() first.');
+        }
+
         await this.server.start();
 
-        Logger.log(`DNS Server is running at ${this.server.ip}:${this.server.port}`);
+        Logger.log(`DNS Server is running at ${this.settings.host}:${this.settings.port}`);
     }
 }
