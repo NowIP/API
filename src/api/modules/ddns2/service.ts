@@ -1,4 +1,4 @@
-import { Logger } from "../../utils/logger";
+import { Logger } from "../../../utils/logger";
 import { DDNS2Model } from "./model";
 
 export class DDNS2Service {
