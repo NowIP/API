@@ -1,7 +1,13 @@
 import { Elysia } from "elysia";
 
-const app = new Elysia().get("/", () => "Hello Elysia").listen(3000);
+import { ddns2 } from "./api/ddns2";
+import { Logger } from "./utils/logger";
 
-console.log(
+const app = new Elysia()
+	.use(ddns2)
+	.listen(3003);
+
+Logger.log(
   `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`
 );
+
