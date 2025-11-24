@@ -18,11 +18,11 @@ class Main {
 
         await API.start(
             parseInt(config.NOWIP_API_PORT ?? "3003"),
-            config.NOWIP_API_HOST ?? "0.0.0.0"
+            config.NOWIP_API_HOST ?? "::"
         );
 
         await DNSServer.init({
-            host: config.NOWIP_DNS_HOST ?? "0.0.0.0",
+            host: config.NOWIP_DNS_HOST ?? "::",
             port: parseInt(config.NOWIP_DNS_PORT ?? "53"),
             rootDomain: config.NOWIP_DNS_ROOT_DOMAIN,
             publicIPv4: config.NOWIP_DNS_PUBLIC_IPV4,

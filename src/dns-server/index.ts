@@ -24,6 +24,8 @@ export class DNSServer {
             nsAdminEmail: "admin.ns." + settings.rootDomain
         });
 
+        dnsRecordStore.createZone(settings.rootDomain);
+
         this.server = new Server({
             ip: settings.host,
             port: settings.port,
