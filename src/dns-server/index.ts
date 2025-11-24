@@ -1,5 +1,6 @@
-import { BasicInMemoryDNSZoneStore, DNSRecords, DNSServer as Server } from 'better-dns';
+import { DNSServer as Server } from 'better-dns';
 import { Logger } from '../utils/logger';
+import { DNSHybridRecordStore } from './recordStore';
 
 interface DNSServerSettings {
     host: string;
@@ -11,7 +12,7 @@ interface DNSServerSettings {
 
 export class DNSServer {
 
-    protected static server: Server<BasicInMemoryDNSZoneStore> | null = null;
+    protected static server: Server<DNSHybridRecordStore> | null = null;
 
     protected static settings: DNSServerSettings | null = null;
 
@@ -23,32 +24,12 @@ export class DNSServer {
             host: settings.host,
             port: settings.port,
             protocol: "both",
-            dnsRecordStore: new BasicInMemoryDNSZoneStore({
-                nsDomain: "ns." + settings.rootDomain,
-                nsAdminEmail: "admin.ns." + settings.rootDomain
+            dnsRecordStore: new DNSHybridRecordStore({
+                baseDomain: settings.rootDomain,
+                publicIPv4: settings.publicIPv4,
+                publicIPv6: settings.publicIPv6
             })
         });
-
-        
-        const zone = await this.server.recordStore.createZone(settings.rootDomain);
-
-        zone.setRecord(settings.rootDomain, DNSRecords.TYPE.A, {
-            address: settings.publicIPv4,
-        });
-        zone.setRecord("ns." + settings.rootDomain, DNSRecords.TYPE.A, {
-            address: settings.publicIPv4
-        });
-
-        if (settings.publicIPv6) {
-            zone.setRecord(settings.rootDomain, DNSRecords.TYPE.AAAA, {
-                address: settings.publicIPv6
-            });
-            zone.setRecord("ns." + settings.rootDomain, DNSRecords.TYPE.AAAA, {
-                address: settings.publicIPv6
-            });
-        }
-
-        await this.server.recordStore.updateZone(zone);
 
     }
 

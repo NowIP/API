@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "25eb0eca-1cee-4b3a-bfba-3ee6f58090c5",
+  "id": "bade47d7-6744-43a1-8382-e0e9035b495f",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "domains": {
@@ -14,37 +14,51 @@
           "notNull": true,
           "autoincrement": true
         },
-        "userId": {
-          "name": "userId",
+        "ownerID": {
+          "name": "ownerID",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "domainName": {
-          "name": "domainName",
+        "subdomain": {
+          "name": "subdomain",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
+        },
+        "lastIPv4": {
+          "name": "lastIPv4",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "lastIPv6": {
+          "name": "lastIPv6",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
         }
       },
       "indexes": {
-        "domains_domainName_unique": {
-          "name": "domains_domainName_unique",
+        "domains_subdomain_unique": {
+          "name": "domains_subdomain_unique",
           "columns": [
-            "domainName"
+            "subdomain"
           ],
           "isUnique": true
         }
       },
       "foreignKeys": {
-        "domains_userId_users_id_fk": {
-          "name": "domains_userId_users_id_fk",
+        "domains_ownerID_users_id_fk": {
+          "name": "domains_ownerID_users_id_fk",
           "tableFrom": "domains",
           "tableTo": "users",
           "columnsFrom": [
-            "userId"
+            "ownerID"
           ],
           "columnsTo": [
             "id"
@@ -67,8 +81,8 @@
           "notNull": true,
           "autoincrement": true
         },
-        "userId": {
-          "name": "userId",
+        "userID": {
+          "name": "userID",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
@@ -99,12 +113,12 @@
         }
       },
       "foreignKeys": {
-        "password_resets_userId_users_id_fk": {
-          "name": "password_resets_userId_users_id_fk",
+        "password_resets_userID_users_id_fk": {
+          "name": "password_resets_userID_users_id_fk",
           "tableFrom": "password_resets",
           "tableTo": "users",
           "columnsFrom": [
-            "userId"
+            "userID"
           ],
           "columnsTo": [
             "id"
