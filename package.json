@@ -7,11 +7,16 @@
     "start": "bun run src/index.ts"
   },
   "dependencies": {
+    "better-dns": "^1.0.0",
+    "drizzle-orm": "^0.44.7",
+    "drizzle-zod": "^0.8.3",
     "elysia": "latest",
     "zod": "^4.1.13"
   },
   "devDependencies": {
-    "bun-types": "latest"
+    "better-sqlite3": "^12.4.6",
+    "bun-types": "latest",
+    "drizzle-kit": "^0.31.7"
   },
   "module": "src/index.js"
 }

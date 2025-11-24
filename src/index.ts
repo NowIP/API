@@ -1,13 +1,27 @@
-import { Elysia } from "elysia";
-
-import { ddns2 } from "./api/ddns2";
+import { API } from "./api";
+import { DB } from "./db";
+import { ConfigHandler } from "./utils/config";
 import { Logger } from "./utils/logger";
 
-const app = new Elysia()
-	.use(ddns2)
-	.listen(3003);
+class Main {
 
-Logger.log(
-  `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`
-);
+    static async main() {
 
+        const config = await ConfigHandler.loadConfig();
+
+        Logger.setLogLevel(config.NOWIP_LOG_LEVEL ?? "info");
+
+        await DB.init(
+            config.NOWIP_DB_PATH ?? "./data/db.sqlite"
+        );
+
+        await API.start(
+            parseInt(config.NOWIP_API_PORT ?? "3003"),
+            config.NOWIP_API_HOST ?? "0.0.0.0"
+        );
+
+    }
+
+}
+
+Main.main();

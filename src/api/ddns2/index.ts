@@ -18,4 +18,4 @@ export const ddns2 = new Elysia()
             query: DDNS2Model.Update.Query,
             headers: DDNS2Model.Update.AuthHeader
 		}
-	)
+	);
