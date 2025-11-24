@@ -1,4 +1,4 @@
-import { BasicInMemoryDNSZoneStore, DNSServer as Server,  } from 'better-dns';
+import { BasicInMemoryDNSZoneStore, DNSRecords, DNSServer as Server,  } from 'better-dns';
 import { Logger } from '../utils/logger';
 
 interface DNSServerSettings {
@@ -11,7 +11,7 @@ interface DNSServerSettings {
 
 export class DNSServer {
 
-    protected static server: Server | null = null;
+    protected static server: Server<BasicInMemoryDNSZoneStore> | null = null;
 
     protected static settings: DNSServerSettings | null = null;
 
@@ -19,19 +19,37 @@ export class DNSServer {
 
         this.settings = settings;
 
-        const dnsRecordStore = new BasicInMemoryDNSZoneStore({
-            nsDomain: "ns." + settings.rootDomain,
-            nsAdminEmail: "admin.ns." + settings.rootDomain
-        });
-
-        dnsRecordStore.createZone(settings.rootDomain);
-
         this.server = new Server({
-            ip: settings.host,
+            host: settings.host,
             port: settings.port,
             protocol: "both",
-            dnsRecordStore
+            dnsRecordStore: new BasicInMemoryDNSZoneStore({
+                nsDomain: "ns." + settings.rootDomain,
+                nsAdminEmail: "admin.ns." + settings.rootDomain
+            })
         });
+
+        
+        const zone = await this.server.recordStore.createZone(settings.rootDomain);
+
+        zone.setRecord(settings.rootDomain, DNSRecords.TYPE.A, {
+            address: settings.publicIPv4,
+        });
+        zone.setRecord("ns." + settings.rootDomain, DNSRecords.TYPE.A, {
+            address: settings.publicIPv4
+        });
+
+        if (settings.publicIPv6) {
+            zone.setRecord(settings.rootDomain, DNSRecords.TYPE.AAAA, {
+                address: settings.publicIPv6
+            });
+            zone.setRecord("ns." + settings.rootDomain, DNSRecords.TYPE.AAAA, {
+                address: settings.publicIPv6
+            });
+        }
+
+        await this.server.recordStore.updateZone(zone);
+
     }
 
     static async start() {
