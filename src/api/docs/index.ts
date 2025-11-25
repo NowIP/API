@@ -41,7 +41,7 @@ const openAPIConfig: Partial<GenerateSpecOptions> = {
 export function setupDocs(app: Hono) {
 
     app.get(
-        "/docs/openapi.json",
+        "/docs/openapi",
         openAPIRouteHandler(app, openAPIConfig),
     );
 
@@ -57,7 +57,7 @@ export function setupDocs(app: Hono) {
                     @layer base, ui, overrides;
                 </style>
                 </head>
-                ${SwaggerUI({ url: '/docs/openapi.json', manuallySwaggerUIHtml: (asset) => `
+                ${SwaggerUI({ url: '/docs/openapi', manuallySwaggerUIHtml: (asset) => `
                     <div>
                         <div id="swagger-ui"></div>
                         ${asset.css.map((url) => `<link rel="stylesheet" href="${url}" />`)}
@@ -69,7 +69,7 @@ export function setupDocs(app: Hono) {
                         window.onload = () => {
                             window.ui = SwaggerUIBundle({
                                 dom_id: '#swagger-ui',
-                                url: '/docs/openapi.json',
+                                url: '/docs/openapi',
                             })
                         }
                         </script>

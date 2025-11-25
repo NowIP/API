@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 
 import { Model } from './model'
-import { validator as zValidator } from "hono-openapi";
+import { describeRoute, resolver, validator as zValidator } from "hono-openapi";
 import { validator } from "hono/validator";
 import { DB } from "../../../db";
 import { eq } from "drizzle-orm";
@@ -11,7 +11,34 @@ import { SessionHandler } from "../../utils/sessionHandler";
 export const router = new Hono().basePath('/auth');
 
 router.post('/login',
+
+    describeRoute({
+        summary: "User Login",
+        description: "Authenticate a user with their username and password",
+
+        responses: {
+            200: {
+                description: "Login successful, returns session information",
+                content: {
+                    "application/json": {
+                        schema: resolver(Model.Login.OKResponse)
+                    }
+                }
+            },
+            401: {
+                description: "Invalid username or password",
+                content: {
+                    "application/json": {
+                        schema: resolver(Model.Login.ErrorResponse)
+                    }
+                }
+            },
+        },
+
+    }),
+
     zValidator("json", Model.Login.Body),
+    
     async (c) => {
         const { username, password } = c.req.valid("json");
 
