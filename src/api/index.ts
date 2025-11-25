@@ -1,6 +1,7 @@
 import { Logger } from "../utils/logger";
 import { authMiddleware } from "./middleware/auth";
 import { Hono } from "hono";
+import { prettyJSON } from "hono/pretty-json";
 
 export class API {
 
@@ -16,6 +17,8 @@ export class API {
 	static async init() {
 
 		this.app = new Hono();
+		
+		this.app.use(prettyJSON())
 
 		// Apply global auth middleware
 		this.app.use(authMiddleware);
