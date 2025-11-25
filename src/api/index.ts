@@ -10,6 +10,7 @@ export class API {
 	protected static routers = [
 		(import('./routes/ddns2')),
 		(import('./routes/auth')),
+		(import('./routes/domains')),
 	];
 
 	static async init() {
