@@ -18,4 +18,12 @@ export class Utils {
         return result;
     }
 
+    static splitNTimesReverse(str: string, delim: string, count: number) {
+        const parts = str.split(delim);
+        const head = parts.slice(0, parts.length - count).join(delim);
+        const result = parts.slice(parts.length - count);
+        if (head) result.unshift(head);
+        return result;
+    }
+
 }

@@ -1,7 +1,8 @@
 import { AbstractDNSRecordStore, DNSRecords, DNSZone } from "better-dns";
 import { DB } from "../db";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { DNSRecordDataSchemas } from "./utils";
+import { Utils } from "../utils";
 
 export interface DNSHybridRecordStoreSettings {
     readonly baseDomain: string;
@@ -88,44 +89,67 @@ export class DNSHybridRecordStore extends AbstractDNSRecordStore {
 
     async getRecords(name: string, type: DNSRecords.TYPES): Promise<DNSRecords.RecordData[]> {
 
+        if (!name.endsWith(this.settings.baseDomain)) {
+            return [];
+        }
+
         const baseDomainRecordData = this.baseZone.getRecords(name, type);
         if (baseDomainRecordData.length > 0) {
             return baseDomainRecordData;
         }
 
-        const subdomain = name.endsWith("." + this.settings.baseDomain)
-            ? name.slice(0, name.length - this.settings.baseDomain.length - 1)
-            : name;
+        const fullSubdomain = name.slice(0, name.length - this.settings.baseDomain.length - 1);
 
-        if (!subdomain) {
-            return [];
-        }
-
-        if (subdomain.includes('.')) {
-            
-        }
+        let [ apexSubdomain, subSubdomain ] = Utils.splitNTimesReverse(fullSubdomain, '.', 1).reverse() as [string | undefined, string | undefined];
         
-
-        const result = (await DB.instance().select()
-            .from(DB.Schema.domains)
-            .where(eq(DB.Schema.domains.subdomain, subdomain)).limit(1))[0];
-
-        if (!result) {
+        if (!apexSubdomain) {
             return [];
         }
 
-        if (type === DNSRecords.TYPE.A && result.last_ipv4) {
-            return [{
-                address: result.last_ipv4,
-                ttl: 300
-            } satisfies DNSRecords.A as DNSRecords.A];
+        const apexDomain = (await DB.instance().select()
+            .from(DB.Schema.domains)
+            .where(eq(DB.Schema.domains.subdomain, apexSubdomain)).limit(1))[0];
+
+        if (!apexDomain) {
+            return [];
         }
 
-        if (type === DNSRecords.TYPE.AAAA && result.last_ipv6) {
-            return [{
-                address: result.last_ipv6,
-                ttl: 300
-            } satisfies DNSRecords.AAAA as DNSRecords.AAAA];
+        if (!subSubdomain && (type === DNSRecords.TYPE.A || type === DNSRecords.TYPE.AAAA)) {
+
+            if (type === DNSRecords.TYPE.A && apexDomain.last_ipv4) {
+                return [{
+                    address: apexDomain.last_ipv4,
+                    ttl: 300
+                } satisfies DNSRecords.A as DNSRecords.A];
+            }
+
+            if (type === DNSRecords.TYPE.AAAA && apexDomain.last_ipv6) {
+                return [{
+                    address: apexDomain.last_ipv6,
+                    ttl: 300
+                } satisfies DNSRecords.AAAA as DNSRecords.AAAA];
+            }
+
+            return [];
+        }
+
+        if (!subSubdomain) {
+            subSubdomain = "@";
+        }
+
+        const recordTypeStr = Object.keys(DNSRecords.TYPE).find(key => DNSRecords.TYPE[key as keyof typeof DNSRecords.TYPE] === type);
+
+        console.log(`Looking for additional DNS records for domain ${apexSubdomain}, subdomain ${subSubdomain}, type ${recordTypeStr}`);
+
+        const additionalRecords = await DB.instance().select()
+            .from(DB.Schema.additionalDnsRecords)
+            .where(and(
+                eq(DB.Schema.additionalDnsRecords.subdomain, subSubdomain),
+                eq(DB.Schema.additionalDnsRecords.type, recordTypeStr as any)
+            ));
+
+        if (additionalRecords.length > 0) {
+            return additionalRecords.map(rec => rec.record_data);
         }
 
         return [];
