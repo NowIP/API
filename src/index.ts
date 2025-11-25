@@ -5,7 +5,7 @@ import { ConfigHandler } from "./utils/config";
 import { Logger } from "./utils/logger";
 
 class Main {
-
+    
     static async main() {
 
         const config = await ConfigHandler.loadConfig();

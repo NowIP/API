@@ -1,7 +1,7 @@
 import { AbstractDNSRecordStore, DNSRecords, DNSZone } from "better-dns";
 import { DB } from "../db";
 import { eq } from "drizzle-orm";
-import { RecordDataSchemas } from "./utils";
+import { DNSRecordDataSchemas } from "./utils";
 
 export interface DNSHybridRecordStoreSettings {
     readonly baseDomain: string;
@@ -65,7 +65,7 @@ export class DNSHybridRecordStore extends AbstractDNSRecordStore {
                             throw new Error(`Record type ${typeStr} under ${name} is not supported in custom records`);
                         }
 
-                        const parsedRecordData = RecordDataSchemas[typeStr as keyof typeof RecordDataSchemas]?.safeParse(recordData);
+                        const parsedRecordData = DNSRecordDataSchemas[typeStr as keyof typeof DNSRecordDataSchemas]?.safeParse(recordData);
 
                         if (!parsedRecordData?.success) {
                             throw new Error(`Invalid record data for type ${typeStr} under ${name}: ${parsedRecordData?.error}`);

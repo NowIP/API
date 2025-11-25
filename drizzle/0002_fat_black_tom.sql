@@ -1,0 +1,1 @@
+ALTER TABLE `additional_dns_records` ADD `subdomain` text NOT NULL;

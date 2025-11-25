@@ -24,11 +24,13 @@ router.get(
 
 		const { hostname, myip } = c.req.valid("query");
 
+		const hostnameSubdomain = hostname.split('.')[0];
+
 		const domain = DB.instance().select().from(DB.Schema.domains).where(
 			and(
 				eq(DB.Schema.domains.id, parseInt(id, 10)),
 				eq(DB.Schema.domains.ddnsv2_api_secret, secret),
-				eq(DB.Schema.domains.subdomain, hostname)
+				eq(DB.Schema.domains.subdomain, hostnameSubdomain)
 			)
 		).get();
 

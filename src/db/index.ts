@@ -57,6 +57,7 @@ export namespace DB.Schema {
     export const passwordResets = TableSchema.passwordResets;
 
     export const domains = TableSchema.domains;
+    export const additionalDnsRecords = TableSchema.additionalDnsRecords;
 
     export const systemConfigs = TableSchema.systemConfigs;
 }
@@ -67,6 +68,7 @@ export namespace DB.Models {
     export type PasswordReset = typeof DB.Schema.passwordResets.$inferSelect;
 
     export type Domain = typeof DB.Schema.domains.$inferSelect;
+    export type AdditionalDNSRecord = typeof DB.Schema.additionalDnsRecords.$inferSelect;
 
     export type SystemConfig = typeof DB.Schema.systemConfigs.$inferSelect;
 }

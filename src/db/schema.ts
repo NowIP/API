@@ -1,8 +1,10 @@
+import { DNSRecords } from 'better-dns';
 import {
     sqliteTable,
     int,
     text
 } from 'drizzle-orm/sqlite-core';
+import { DNSRecordDataSchemasNames } from '../dns-server/utils';
 
 /**
  * @deprecated Use DB.Schema.users instead
@@ -43,6 +45,19 @@ export const domains = sqliteTable('domains', {
     last_ipv4: text(),
     last_ipv6: text(),
     ddnsv2_api_secret: text().notNull()
+});
+
+/**
+ * @deprecated Use DB.Schema.additionalDnsRecords instead
+ */
+export const additionalDnsRecords = sqliteTable('additional_dns_records', {
+    id: int().primaryKey({ autoIncrement: true }),
+    domain_id: int().notNull().references(() => domains.id),
+    subdomain: text().notNull(),
+    type: text({
+        enum: DNSRecordDataSchemasNames as ["A", "AAAA", "CNAME", "MX", "SRV", "TXT", "SPF", "CAA"]
+    }).notNull(),
+    record_data: text({ mode: "json" }).notNull().$type<DNSRecords.RecordData>(),
 });
 
 /**
