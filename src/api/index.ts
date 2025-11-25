@@ -27,6 +27,10 @@ export class API {
 
 	static async start(port: number, hostname: string) {
 
+		if (!this.app) {
+			await this.init();
+		}
+
 		this.server = Bun.serve({ port, hostname, fetch: this.app.fetch });
 
 		Logger.log(`API is running at ${this.server?.hostname}:${this.server?.port}`);

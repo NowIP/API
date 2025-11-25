@@ -2,8 +2,8 @@ import { Context } from "hono";
 
 export class APIRes {
 
-    static success<Data>(c: Context, message: string, data: Data) {
-        return c.json({ success: true, message, data });
+    static success<Data extends Object>(c: Context, data: Data) {
+        return c.json({ success: true, data });
     }
 
     static error(c: Context, message: string) {
