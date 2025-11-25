@@ -43,4 +43,7 @@ package-lock.json
 
 .env
 
+config/*
+!config/*.example.json
+
 data/

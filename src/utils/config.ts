@@ -118,9 +118,10 @@ export class ConfigHandler {
         .add("NOWIP_DNS_HOST", false)
         .add("NOWIP_DNS_PORT", false)
 
-        .add("NOWIP_DNS_ROOT_DOMAIN", true)
-        .add("NOWIP_DNS_PUBLIC_IPV4", true)
-        .add("NOWIP_DNS_PUBLIC_IPV6", false)
+        .add("NOWIP_DNS_DOMAIN", true)
+        .add("NOWIP_DNS_NS_PRIMARY", true)
+        .add("NOWIP_DNS_NS_SECONDARY", false)
+        .add("NOWIP_DNS_CUSTOM_RECORDS_FILE", false);
 
 
     private static config: ParsedConfig | null = null;

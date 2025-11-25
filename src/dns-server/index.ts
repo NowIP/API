@@ -1,13 +1,10 @@
 import { DNSServer as Server } from 'better-dns';
 import { Logger } from '../utils/logger';
-import { DNSHybridRecordStore } from './recordStore';
+import { DNSHybridRecordStore, DNSHybridRecordStoreSettings } from './recordStore';
 
-interface DNSServerSettings {
+interface DNSServerSettings extends DNSHybridRecordStoreSettings {
     host: string;
     port: number;
-    rootDomain: string;
-    publicIPv4: string;
-    publicIPv6?: string;
 }
 
 export class DNSServer {
@@ -24,13 +21,10 @@ export class DNSServer {
             host: settings.host,
             port: settings.port,
             protocol: "both",
-            dnsRecordStore: new DNSHybridRecordStore({
-                baseDomain: settings.rootDomain,
-                publicIPv4: settings.publicIPv4,
-                publicIPv6: settings.publicIPv6
-            })
+            dnsRecordStore: new DNSHybridRecordStore(settings)
         });
 
+        await this.server.recordStore.loadCustomRecordsFromFile();
     }
 
     static async start() {

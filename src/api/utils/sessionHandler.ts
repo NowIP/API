@@ -1,7 +1,6 @@
 import { eq } from "drizzle-orm";
 import { DB } from "../../db";
 import { randomBytes as crypto_randomBytes } from 'crypto';
-import { InferSelectModel } from "drizzle-orm";
 
 export class SessionHandler {
 

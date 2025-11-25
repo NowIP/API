@@ -24,10 +24,12 @@ class Main {
         await DNSServer.init({
             host: config.NOWIP_DNS_HOST ?? "::",
             port: parseInt(config.NOWIP_DNS_PORT ?? "53"),
-            rootDomain: config.NOWIP_DNS_ROOT_DOMAIN,
-            publicIPv4: config.NOWIP_DNS_PUBLIC_IPV4,
-            publicIPv6: config.NOWIP_DNS_PUBLIC_IPV6
+            baseDomain: config.NOWIP_DNS_DOMAIN,
+            nsPrimaryDomain: config.NOWIP_DNS_NS_PRIMARY,
+            nsSecondaryDomain: config.NOWIP_DNS_NS_SECONDARY,
+            customRecordsFile: config.NOWIP_DNS_CUSTOM_RECORDS_FILE
         });
+
         await DNSServer.start();
 
     }
