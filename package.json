@@ -1,27 +1,25 @@
 {
-  "name": "nowip-api",
-  "version": "1.0.50",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "bun run --watch src/index.ts",
-
-    "db:generate": "bun scripts/db-utils && drizzle-kit generate --config=drizzle.config.ts",
-    "db:migrate": "bun scripts/db-utils && drizzle-kit migrate --config=drizzle.config.ts",
-    "db:push": "bun scripts/db-utils && drizzle-kit push --config=drizzle.config.ts",
-    
-    "start": "bun run src/index.ts"
-  },
-  "dependencies": {
-    "@hono/zod-validator": "^0.7.5",
-    "better-dns": "^1.2.0",
-    "drizzle-orm": "^0.44.7",
-    "drizzle-zod": "^0.8.3",
-    "hono": "^4.10.6",
-    "zod": "^4.1.13"
-  },
-  "devDependencies": {
-    "bun-types": "latest",
-    "drizzle-kit": "^0.31.7"
-  },
-  "module": "src/index.ts"
+    "name": "nowip-api",
+    "version": "1.0.50",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "dev": "bun run --watch src/index.ts",
+        "db:generate": "bun scripts/db-utils && drizzle-kit generate --config=drizzle.config.ts",
+        "db:migrate": "bun scripts/db-utils && drizzle-kit migrate --config=drizzle.config.ts",
+        "db:push": "bun scripts/db-utils && drizzle-kit push --config=drizzle.config.ts",
+        "start": "bun run src/index.ts"
+    },
+    "dependencies": {
+        "@hono/zod-validator": "^0.7.5",
+        "better-dns": "^1.2.0",
+        "drizzle-orm": "^0.44.7",
+        "drizzle-zod": "^0.8.3",
+        "hono": "^4.10.6",
+        "zod": "^4.1.13"
+    },
+    "devDependencies": {
+        "bun-types": "latest",
+        "drizzle-kit": "^0.31.7"
+    },
+    "module": "src/index.ts"
 }
