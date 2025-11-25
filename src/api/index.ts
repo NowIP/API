@@ -31,6 +31,10 @@ export class API {
 			this.app.route("/", (await router).router);
 		}
 
+		this.app.get("/", (c) => {
+			return c.json({ status: "NowIP API is running" });
+		});
+
 		setupDocs(this.app);
 
 	}
