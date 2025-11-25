@@ -1,6 +1,4 @@
-
 import { Logger } from "../utils/logger";
-import z from "zod";
 import { authMiddleware } from "./middleware/auth";
 import { Hono } from "hono";
 
