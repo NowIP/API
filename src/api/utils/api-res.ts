@@ -6,6 +6,10 @@ export class APIRes {
         return c.json({ success: true, message, data });
     }
 
+    static created<Data>(c: Context, data: Data, message?: string) {
+        return c.json({ success: true, message, data }, 201);
+    }
+
     static error(c: Context, message: string) {
         return c.json({ success: false, message }, 500);
     }
@@ -20,6 +24,10 @@ export class APIRes {
 
     static notFound(c: Context, message: string) {
         return c.json({ success: false, message }, 404);
+    }
+
+    static conflict(c: Context, message: string) {
+        return c.json({ success: false, message }, 409);
     }
 
 }
