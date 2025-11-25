@@ -11,10 +11,10 @@ export class DB {
     static async init(path: string) {
         this.db = drizzle(path);
 
-        this.db.insert(DB.Schema.systemConfigs).values({
+        await this.db.insert(DB.Schema.systemConfigs).values({
             key: 'dns_serial',
             value: '0'
-        }).onConflictDoNothing().run();
+        }).onConflictDoNothing();
     }
 
     static instance() {

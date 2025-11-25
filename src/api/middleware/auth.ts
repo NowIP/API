@@ -1,5 +1,6 @@
 import { createMiddleware } from 'hono/factory'
 import { APIRes } from "../utils/api-res";
+import { SessionHandler } from '../utils/sessionHandler';
 
 export const authMiddleware = createMiddleware(async (c, next) => {
 
@@ -9,11 +10,13 @@ export const authMiddleware = createMiddleware(async (c, next) => {
 
     const authHeader = c.req.header("Authorization");
 
-    if (!authHeader || !authHeader.startsWith("Basic ")) {
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
         return APIRes.unauthorized(c, "Missing or invalid Authorization header");
     }
 
-    
+    if (!await SessionHandler.isValidSession(authHeader.substring("Bearer ".length))) {
+        return APIRes.unauthorized(c, "Invalid or expired session");
+    }
 
     await next();
 
