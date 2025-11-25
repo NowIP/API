@@ -108,7 +108,7 @@ export class ConfigHandler {
         .add("NOWIP_API_HOST", false)
         .add("NOWIP_API_PORT", false)
 
-        .add("NOWIP_APP_DOMAIN", true)
+        .add("NOWIP_FRONTEND_URL", true)
         .add("NOWIP_APP_ENABLE_SIGNUP", true, [true, false])
 
         .add("NOWIP_DB_PATH", false)

@@ -6,6 +6,7 @@ import { Hono } from "hono";
 import { prettyJSON } from "hono/pretty-json";
 import { openAPIRouteHandler } from "hono-openapi";
 import { setupDocs } from "./docs";
+import { cors } from "hono/cors";
 
 export class API {
 
@@ -18,11 +19,20 @@ export class API {
 		(import('./routes/domains')),
 	];
 
-	static async init() {
+	static async init(
+		frontendUrl: string = "http://localhost:3000"
+	) {
 
 		this.app = new Hono();
 
 		this.app.use(prettyJSON())
+
+		this.app.use('*', cors({
+			origin: frontendUrl,
+			maxAge: 600,
+			credentials: true,
+		}))
+
 
 		// Apply global auth middleware
 		this.app.use(authMiddleware);

@@ -16,6 +16,10 @@ class Main {
             config.NOWIP_DB_PATH ?? "./data/db.sqlite"
         );
 
+        await API.init(
+            config.NOWIP_FRONTEND_URL ?? "http://localhost:3000"
+        );
+
         await API.start(
             parseInt(config.NOWIP_API_PORT ?? "3003"),
             config.NOWIP_API_HOST ?? "::"
