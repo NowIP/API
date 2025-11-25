@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { DB } from "../../../db";
 import { APIRes } from "../../utils/api-res";
 import { eq, and } from "drizzle-orm";
-import { zValidator } from "@hono/zod-validator";
+import { describeRoute, validator as zValidator } from "hono-openapi";
 import { z } from "zod";
 import { createInsertSchema, createUpdateSchema } from "drizzle-zod";
 import { randomBytes as crypto_randomBytes } from 'crypto';
@@ -11,6 +11,24 @@ import { router as records_router } from "./records";
 export const router = new Hono().basePath('/domains');
 
 router.get('/',
+
+    describeRoute({
+        summary: "List Domains",
+        description: "Retrieve a list of all domains owned by the authenticated user.",
+        tags: ["Domains"],
+
+        security: [{ BearerAuth: [] }],
+
+        responses: {
+            200: {
+                description: "A list of domains owned by the user",
+            },
+            401: {
+                description: "Authentication information is missing or invalid",
+            },
+        },
+    }),
+
     async (c) => {
         // @ts-ignore
         const session = c.get("session") as DB.Models.Session;
@@ -47,19 +65,19 @@ router.post('/',
     }
 );
 
-router.use('/:id/*',
+router.use('/:domainID/*',
     zValidator("param", z.object({
-        id: z.string().transform((val) => parseInt(val, 10))
+        domainID: z.string().transform((val) => parseInt(val, 10))
     })),
     async (c, next) => {
         // @ts-ignore
-        const { id } = c.req.valid("param");
+        const { domainID } = c.req.valid("param");
 
         // @ts-ignore
         const session = c.get("session") as DB.Models.Session;
 
         const domain = DB.instance().select().from(DB.Schema.domains).where(and(
-            eq(DB.Schema.domains.id, id),
+            eq(DB.Schema.domains.id, domainID),
             eq(DB.Schema.domains.owner_id, session.user_id)
         )).get();
 
@@ -73,7 +91,7 @@ router.use('/:id/*',
     }
 );
 
-router.get('/:id',
+router.get('/:domainID',
     async (c) => {
         // @ts-ignore
         const domain = c.get("domain") as DB.Models.Domain;
@@ -82,7 +100,7 @@ router.get('/:id',
     }
 );
 
-router.delete('/:id',
+router.delete('/:domainID',
     async (c) => {
         // @ts-ignore
         const domain = c.get("domain") as DB.Models.Domain;
@@ -93,7 +111,7 @@ router.delete('/:id',
     }
 );
 
-router.put('/:id',
+router.put('/:domainID',
     zValidator("json", createUpdateSchema(DB.Schema.domains, {
         subdomain: z.string().min(1).max(50)
     })

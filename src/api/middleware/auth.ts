@@ -4,7 +4,7 @@ import { SessionHandler } from '../utils/sessionHandler';
 
 export const authMiddleware = createMiddleware(async (c, next) => {
 
-    if (c.req.path.startsWith("/nic/update") || c.req.path.startsWith("/auth")) {
+    if (c.req.path.startsWith("/nic/update") || c.req.path.startsWith("/auth") || c.req.path.startsWith("/docs")) {
         await next();
     }
 

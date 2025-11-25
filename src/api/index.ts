@@ -1,7 +1,11 @@
+import { swaggerUI } from "@hono/swagger-ui";
+import { swaggerEditor } from "@hono/swagger-editor";
 import { Logger } from "../utils/logger";
 import { authMiddleware } from "./middleware/auth";
 import { Hono } from "hono";
 import { prettyJSON } from "hono/pretty-json";
+import { openAPIRouteHandler } from "hono-openapi";
+import { setupDocs } from "./docs";
 
 export class API {
 
@@ -17,7 +21,7 @@ export class API {
 	static async init() {
 
 		this.app = new Hono();
-		
+
 		this.app.use(prettyJSON())
 
 		// Apply global auth middleware
@@ -26,6 +30,8 @@ export class API {
 		for (const router of this.routers) {
 			this.app.route("/", (await router).router);
 		}
+
+		setupDocs(this.app);
 
 	}
 

@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { zValidator } from "@hono/zod-validator";
+import { validator as zValidator } from "hono-openapi";
 import { z } from "zod";
 import { DB } from "../../../../db";
 import { eq, and } from "drizzle-orm";
@@ -7,7 +7,7 @@ import { APIRes } from "../../../utils/api-res";
 import { createInsertSchema, createUpdateSchema } from "drizzle-zod";
 import { DNSRecordDataSchemas } from "../../../../dns-server/utils";
 
-export const router = new Hono().basePath('/:id/records');
+export const router = new Hono().basePath('/:domainID/records');
 
 router.get('/',
 
@@ -69,19 +69,19 @@ router.post('/',
     }   
 );
 
-router.use('/:id/*',
+router.use('/:recordID/*',
     zValidator("param", z.object({
-        id: z.string().transform((val) => parseInt(val, 10))
+        recordID: z.string().transform((val) => parseInt(val, 10))
     })),
     async (c, next) => {
         // @ts-ignore
-        const { id } = c.req.valid("param");
+        const { recordID } = c.req.valid("param");
 
         // @ts-ignore
         const domain = c.get("domain") as DB.Models.Domain;
 
         const record = DB.instance().select().from(DB.Schema.additionalDnsRecords).where(and(
-            eq(DB.Schema.additionalDnsRecords.id, id),
+            eq(DB.Schema.additionalDnsRecords.id, recordID),
             eq(DB.Schema.additionalDnsRecords.domain_id, domain.id)
         )).get();
 
@@ -95,7 +95,7 @@ router.use('/:id/*',
     }
 );
 
-router.get('/:id',
+router.get('/:recordID',
     async (c) => {
         // @ts-ignore
         const record = c.get("record") as DB.Models.AdditionalDNSRecord;
@@ -106,18 +106,7 @@ router.get('/:id',
     }
 );
 
-router.delete('/:id',
-    async (c) => {
-        // @ts-ignore
-        const record = c.get("record") as DB.Models.AdditionalDNSRecord;
-
-        await DB.instance().delete(DB.Schema.additionalDnsRecords).where(eq(DB.Schema.additionalDnsRecords.id, record.id));
-
-        return APIRes.success(c, null, "Record deleted successfully");
-    }
-);
-
-router.put('/:id',
+router.put('/:recordID',
     zValidator("json", createUpdateSchema(DB.Schema.additionalDnsRecords, {
         subdomain: z.string().min(1).max(50),
     }).omit({ id: true, domain_id: true })),
@@ -150,5 +139,16 @@ router.put('/:id',
         }).where(eq(DB.Schema.additionalDnsRecords.id, record.id));
 
         return APIRes.success(c, null, "Record updated successfully");
+    }
+);
+
+router.delete('/:recordID',
+    async (c) => {
+        // @ts-ignore
+        const record = c.get("record") as DB.Models.AdditionalDNSRecord;
+
+        await DB.instance().delete(DB.Schema.additionalDnsRecords).where(eq(DB.Schema.additionalDnsRecords.id, record.id));
+
+        return APIRes.success(c, null, "Record deleted successfully");
     }
 );

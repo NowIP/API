@@ -1,7 +1,7 @@
 import { Model } from './model'
 import { Hono } from 'hono';
 import { Logger } from '../../../utils/logger';
-import { zValidator } from '@hono/zod-validator';
+import { describeRoute, validator as zValidator } from 'hono-openapi';
 import { DB } from '../../../db';
 import { eq, and } from 'drizzle-orm';
 
@@ -9,8 +9,40 @@ export const router = new Hono();
 
 router.get(
 	'/nic/update',
+
+	describeRoute({
+		summary: "DDNSv2 Update Endpoint",
+		description: "Endpoint for updating domain IP addresses using the DDNSv2 protocol.",
+		tags: ["DDNSv2"],
+		responses: {
+			200: {
+				description: "IP address updated successfully",
+				content: {
+					"text/plain": {
+						schema: {
+							type: "string",
+							example: "good 192.168.1.1"
+						}
+					}
+				}
+			},
+			401: {
+				description: "Authentication information is missing or invalid",
+				content: {
+					"text/plain": {
+						schema: {
+							type: "string",
+							example: "badauth"
+						}
+					}
+				}
+			},
+		},
+	}),
+
 	zValidator("query", Model.Update.Query),
 	zValidator("header", Model.Update.AuthHeader),
+
 	async (c) => {
 		const basicAuthHeader = c.req.valid("header").authorization;
 
@@ -19,7 +51,7 @@ router.get(
 		const [id, secret] = credentials.split(':');
 
 		if (!id || !secret) {
-			return c.text("badauth");
+			return c.text("badauth", 401);
 		}
 
 		const { hostname, myip } = c.req.valid("query");
@@ -35,7 +67,7 @@ router.get(
 		).get();
 
 		if (!domain) {
-			return c.text("badauth");
+			return c.text("badauth", 401);
 		}
 
 		DB.instance().update(DB.Schema.domains).set({
@@ -43,6 +75,6 @@ router.get(
 			last_ipv6: myip.includes(':') ? myip : domain.last_ipv6
 		}).where(eq(DB.Schema.domains.id, domain.id)).run();
 
-		return c.text("good " + myip);
+		return c.text("good " + myip, 200);
 	}
 );
