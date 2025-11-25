@@ -5,7 +5,7 @@ import { eq, and } from "drizzle-orm";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
 import { createInsertSchema } from "drizzle-zod";
-import crypto from "crypto";
+import { randomBytes as crypto_randomBytes } from 'crypto';
 
 export const router = new Hono().basePath('/domains');
 
@@ -54,7 +54,7 @@ router.post('/',
         const result = DB.instance().insert(DB.Schema.domains).values({
             ...domainData,
             owner_id: session.user_id,
-            ddnsv2_api_secret: crypto.randomBytes(16).toString('hex')
+            ddnsv2_api_secret: crypto_randomBytes(16).toString('hex')
         }).returning().get();
 
         return APIRes.created(c, { id: result.id }, "Domain created successfully");

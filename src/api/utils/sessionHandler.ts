@@ -1,13 +1,13 @@
 import { eq } from "drizzle-orm";
 import { DB } from "../../db";
-import crypto from "crypto";
+import { randomBytes as crypto_randomBytes } from 'crypto';
 import { InferSelectModel } from "drizzle-orm";
 
 export class SessionHandler {
 
     static async createSession(userID: number) {
         const result = await DB.instance().insert(DB.Schema.sessions).values({
-            token: crypto.randomBytes(32).toString('hex'),
+            token: crypto_randomBytes(32).toString('hex'),
             user_id: userID,
             expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).getTime() // 7 days from now
         }).returning()

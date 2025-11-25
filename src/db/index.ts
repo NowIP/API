@@ -1,7 +1,7 @@
 import { drizzle } from 'drizzle-orm/bun-sqlite';
 import { Database } from 'bun:sqlite';
 import * as TableSchema from './schema';
-import crypto from 'crypto';
+import { randomBytes as crypto_randomBytes } from 'crypto';
 
 export type DrizzleDB = ReturnType<typeof drizzle>;
 
@@ -21,7 +21,7 @@ export class DB {
         if (!usersTableEmpty) return;
 
         const username = "admin";
-        const randomPassword = crypto.randomBytes(32).toString('hex');
+        const randomPassword = crypto_randomBytes(32).toString('hex');
 
         await this.db.insert(DB.Schema.users).values({
             username,
