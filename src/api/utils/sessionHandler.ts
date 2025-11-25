@@ -1,6 +1,7 @@
 import { eq } from "drizzle-orm";
 import { DB } from "../../db";
 import crypto from "crypto";
+import { InferSelectModel } from "drizzle-orm";
 
 export class SessionHandler {
 
@@ -16,9 +17,16 @@ export class SessionHandler {
         return { sessionToken };
     }
 
-    static async isValidSession(sessionToken: string) {
-
+    static async getSession(sessionToken: string) {
         const session = DB.instance().select().from(DB.Schema.sessions).where(eq(DB.Schema.sessions.token, sessionToken)).get();
+        if (!session) {
+            return null;
+        }
+
+        return session;
+    }
+
+    static async isValidSession(session: DB.Models.Session) {
         if (!session || session.expires_at < Date.now()) {
             return false;
         }

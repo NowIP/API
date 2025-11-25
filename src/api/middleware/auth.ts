@@ -14,9 +14,14 @@ export const authMiddleware = createMiddleware(async (c, next) => {
         return APIRes.unauthorized(c, "Missing or invalid Authorization header");
     }
 
-    if (!await SessionHandler.isValidSession(authHeader.substring("Bearer ".length))) {
+    const token = authHeader.substring("Bearer ".length);
+    const session = await SessionHandler.getSession(token);
+
+    if (!session || !(await SessionHandler.isValidSession(session))) {
         return APIRes.unauthorized(c, "Invalid or expired session");
     }
+
+    c.set("session", session);
 
     await next();
 

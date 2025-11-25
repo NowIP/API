@@ -2,7 +2,7 @@ import {
     sqliteTable,
     int,
     text
-} from 'drizzle-orm/sqlite-core'
+} from 'drizzle-orm/sqlite-core';
 
 /**
  * @deprecated Use DB.Schema.users instead

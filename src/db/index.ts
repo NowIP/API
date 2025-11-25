@@ -29,8 +29,20 @@ export class DB {
 
 export namespace DB.Schema {
     export const users = TableSchema.users;
-    export const passwordResets = TableSchema.passwordResets;
     export const sessions = TableSchema.sessions;
+    export const passwordResets = TableSchema.passwordResets;
+
     export const domains = TableSchema.domains;
+
     export const systemConfigs = TableSchema.systemConfigs;
+}
+
+export namespace DB.Models {
+    export type User = typeof DB.Schema.users.$inferSelect;
+    export type Session = typeof DB.Schema.sessions.$inferSelect;
+    export type PasswordReset = typeof DB.Schema.passwordResets.$inferSelect;
+
+    export type Domain = typeof DB.Schema.domains.$inferSelect;
+
+    export type SystemConfig = typeof DB.Schema.systemConfigs.$inferSelect;
 }
