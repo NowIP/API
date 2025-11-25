@@ -10,11 +10,11 @@
     "start": "bun run src/index.ts"
   },
   "dependencies": {
-    "@elysiajs/openapi": "^1.4.11",
+    "@hono/zod-openapi": "^1.1.5",
     "better-dns": "^1.2.0",
     "drizzle-orm": "^0.44.7",
     "drizzle-zod": "^0.8.3",
-    "elysia": "latest",
+    "hono": "^4.10.6",
     "zod": "^4.1.13"
   },
   "devDependencies": {

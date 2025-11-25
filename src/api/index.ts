@@ -1,14 +1,13 @@
-import { Elysia } from "elysia";
 
-import { ddns2 } from "./modules/ddns2";
+import { ddns2 } from "./routes/ddns2";
 import { Logger } from "../utils/logger";
-import openapi, { fromTypes } from "@elysiajs/openapi";
 import z from "zod";
 import { authMiddleware } from "./middleware/auth";
+import { Hono } from "hono";
 
 const routes = {
-    ddns2: (await import('./modules/ddns2')).ddns2,
-    auth: await import('./modules/auth'),
+    ddns2: (await import('./routes/ddns2')).ddns2,
+    auth: await import('./routes/auth'),
 }
 
 
@@ -17,12 +16,7 @@ export class API {
 
 	static async start(port: number, hostname: string) {
 		
-		let app = new Elysia()
-			.use(openapi({
-				mapJsonSchema: {
-					zod: z.toJSONSchema
-				}
-			}))
+		const app = new Hono()
 			.use(authMiddleware)
 			.use(routes.ddns2);	
 

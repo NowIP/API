@@ -84,16 +84,16 @@ export class DNSHybridRecordStore extends AbstractDNSRecordStore {
             return [];
         }
         
-        if (type === DNSRecords.TYPE.A && result.lastIPv4) {
+        if (type === DNSRecords.TYPE.A && result.last_ipv4) {
             return [{
-                address: result.lastIPv4,
+                address: result.last_ipv4,
                 ttl: 300
             } satisfies DNSRecords.A as DNSRecords.A];
         }
 
-        if (type === DNSRecords.TYPE.AAAA && result.lastIPv6) {
+        if (type === DNSRecords.TYPE.AAAA && result.last_ipv6) {
             return [{
-                address: result.lastIPv6,
+                address: result.last_ipv6,
                 ttl: 300
             } satisfies DNSRecords.AAAA as DNSRecords.AAAA];
         }

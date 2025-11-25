@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "bade47d7-6744-43a1-8382-e0e9035b495f",
+  "id": "701795e0-e4d3-4fc0-9427-3445faecf489",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "domains": {
@@ -14,8 +14,8 @@
           "notNull": true,
           "autoincrement": true
         },
-        "ownerID": {
-          "name": "ownerID",
+        "owner_id": {
+          "name": "owner_id",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
@@ -28,18 +28,25 @@
           "notNull": true,
           "autoincrement": false
         },
-        "lastIPv4": {
-          "name": "lastIPv4",
+        "last_ipv4": {
+          "name": "last_ipv4",
           "type": "text",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
         },
-        "lastIPv6": {
-          "name": "lastIPv6",
+        "last_ipv6": {
+          "name": "last_ipv6",
           "type": "text",
           "primaryKey": false,
           "notNull": false,
+          "autoincrement": false
+        },
+        "ddnsv2_api_secret": {
+          "name": "ddnsv2_api_secret",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
           "autoincrement": false
         }
       },
@@ -53,12 +60,12 @@
         }
       },
       "foreignKeys": {
-        "domains_ownerID_users_id_fk": {
-          "name": "domains_ownerID_users_id_fk",
+        "domains_owner_id_users_id_fk": {
+          "name": "domains_owner_id_users_id_fk",
           "tableFrom": "domains",
           "tableTo": "users",
           "columnsFrom": [
-            "ownerID"
+            "owner_id"
           ],
           "columnsTo": [
             "id"
@@ -81,22 +88,22 @@
           "notNull": true,
           "autoincrement": true
         },
-        "userID": {
-          "name": "userID",
+        "user_id": {
+          "name": "user_id",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "resetToken": {
-          "name": "resetToken",
+        "reset_token": {
+          "name": "reset_token",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "expiresAt": {
-          "name": "expiresAt",
+        "expires_at": {
+          "name": "expires_at",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
@@ -104,21 +111,81 @@
         }
       },
       "indexes": {
-        "password_resets_resetToken_unique": {
-          "name": "password_resets_resetToken_unique",
+        "password_resets_reset_token_unique": {
+          "name": "password_resets_reset_token_unique",
           "columns": [
-            "resetToken"
+            "reset_token"
           ],
           "isUnique": true
         }
       },
       "foreignKeys": {
-        "password_resets_userID_users_id_fk": {
-          "name": "password_resets_userID_users_id_fk",
+        "password_resets_user_id_users_id_fk": {
+          "name": "password_resets_user_id_users_id_fk",
           "tableFrom": "password_resets",
           "tableTo": "users",
           "columnsFrom": [
-            "userID"
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "sessions": {
+      "name": "sessions",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "session_token": {
+          "name": "session_token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "sessions_session_token_unique": {
+          "name": "sessions_session_token_unique",
+          "columns": [
+            "session_token"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "sessions_user_id_users_id_fk": {
+          "name": "sessions_user_id_users_id_fk",
+          "tableFrom": "sessions",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
           ],
           "columnsTo": [
             "id"
@@ -179,8 +246,8 @@
           "notNull": true,
           "autoincrement": false
         },
-        "passwordHash": {
-          "name": "passwordHash",
+        "password_hash": {
+          "name": "password_hash",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
