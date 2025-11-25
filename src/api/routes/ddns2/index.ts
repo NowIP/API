@@ -1,33 +1,30 @@
-
-import { DDNS2Service } from './service'
-import { DDNS2Model } from './model'
+import { Model } from './model'
 import { Hono } from 'hono';
 import { Logger } from '../../../utils/logger';
+import { zValidator } from '@hono/zod-validator';
 
-export const ddnsv2api = new Hono();
+export const router = new Hono();
 
-ddnsv2api.get('/nic/update', async (c) => {
+router.get(
+	'/nic/update',
+	zValidator("query", Model.Update.Query),
+	zValidator("header", Model.Update.AuthHeader),
+	async (c) => {
+		const basicAuthHeader = c.req.valid("header").authorization;
 
-      const basicAuthHeader = c.req.header("Authorization");
+		const base64Credentials = basicAuthHeader.slice('Basic '.length);
+		const credentials = Buffer.from(base64Credentials, 'base64').toString('utf-8');
+		const [username, password] = credentials.split(':');
 
-      if (!basicAuthHeader || !basicAuthHeader.startsWith('Basic ')) {
-          return c.json({ status: "ERROR", message: "Unauthorized" }, 401);
-      }
+		if (!username || !password) {
+			return c.text("badauth");
+		}
 
-      const base64Credentials = basicAuthHeader.slice('Basic '.length);
-      const credentials = Buffer.from(base64Credentials, 'base64').toString('utf-8');
-      const [username, password] = credentials.split(':');
+		const { hostname, myip } = c.req.valid("query");
 
-      if (!username || !password) {
-            return c.json({ status: "ERROR", message: "Unauthorized" }, 401);
-            return "badauth";
-        }
+		Logger.log(`Received update request for hostname: ${hostname} with IP: ${myip} from user: ${username} with password: ${password}`);
 
-        Logger.log(`Received update request for hostname: ${hostname} with IP: ${myip} from user: ${username} with password: ${password}`);
+		return c.text("good " + myip);
 
-        return "good " + myip;
-
-}, {
-      query: DDNS2Model.Update.Query,
-      headers: DDNS2Model.Update.AuthHeader
-});
+	}
+);

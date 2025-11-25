@@ -1,16 +1,13 @@
 import z from "zod";
 
-export namespace AuthModel {
+export namespace Model.Login {
 
-    export namespace Login {
+    export const Body = z.object({
+        username: z.string(),
+        password: z.string(),
+    });
 
-        export const Body = z.object({
-            username: z.string(),
-            password: z.string(),
-        });
-
-        export type Body = z.infer<typeof Body>;
-
-    }
+    export type Body = z.infer<typeof Body>;
 
 }
+

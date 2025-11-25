@@ -1,11 +1,15 @@
-import { Elysia } from "elysia";
+import { Hono } from "hono";
 
-import { AuthService } from './service'
-import { AuthModel } from './model'
+import { Model } from './model'
+import { zValidator } from "@hono/zod-validator";
 
-export const auth = new Elysia({ prefix: '/auth' })
-    .get('/login', async ({ body }) => {
+export const router = new Hono().basePath('/auth');
 
-    }, {
-        body: AuthModel.Login.Body,
-    }); 
+router.get('/login',
+    zValidator("json", Model.Login.Body),
+    async (c) => {
+
+        const { username, password } = c.req.valid("json");
+        
+    }
+);

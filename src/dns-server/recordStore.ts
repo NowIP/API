@@ -1,6 +1,5 @@
 import { AbstractDNSRecordStore, DNSRecords, DNSZone } from "better-dns";
 import { DB } from "../db";
-import { TableSchema } from "../db/schema";
 import { eq } from "drizzle-orm";
 
 export class DNSHybridRecordStore extends AbstractDNSRecordStore {
@@ -46,11 +45,11 @@ export class DNSHybridRecordStore extends AbstractDNSRecordStore {
         soa.serial = newSerial;
         this.baseZone.setRecord(this.settings.baseDomain, DNSRecords.TYPE.SOA, soa);
 
-        const serial = (await DB.instance().update(TableSchema.systemConfigs)
+        const serial = (await DB.instance().update(DB.Schema.systemConfigs)
             .set({
                 value: newSerial.toString()
             })
-            .where(eq(TableSchema.systemConfigs.key, 'dns_serial'))
+            .where(eq(DB.Schema.systemConfigs.key, 'dns_serial'))
             .returning()
         )[0]?.value;
 
@@ -77,8 +76,8 @@ export class DNSHybridRecordStore extends AbstractDNSRecordStore {
         console.log(subdomain);
 
         const result = (await DB.instance().select()
-            .from(TableSchema.domains)
-            .where(eq(TableSchema.domains.subdomain, subdomain)).limit(1))[0];
+            .from(DB.Schema.domains)
+            .where(eq(DB.Schema.domains.subdomain, subdomain)).limit(1))[0];
     
         if (!result) {
             return [];

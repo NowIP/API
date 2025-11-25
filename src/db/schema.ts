@@ -5,7 +5,7 @@ import {
 } from 'drizzle-orm/sqlite-core'
 
 /**
- * @deprecated Use TableSchema.users instead
+ * @deprecated Use DB.Schema.users instead
  */
 export const users = sqliteTable('users', {
     id: int().primaryKey({ autoIncrement: true }),
@@ -15,28 +15,26 @@ export const users = sqliteTable('users', {
 });
 
 /**
- * @deprecated Use TableSchema.passwordResets instead
+ * @deprecated Use DB.Schema.passwordResets instead
  */
 export const passwordResets = sqliteTable('password_resets', {
-    id: int().primaryKey({ autoIncrement: true }),
+    token: text().primaryKey(),
     user_id: int().notNull().references(() => users.id),
-    reset_token: text().notNull().unique(),
     expires_at: int().notNull()
 });
 
 /**
- * @deprecated Use TableSchema.sessions instead
+ * @deprecated Use DB.Schema.sessions instead
  */
 export const sessions = sqliteTable('sessions', {
-    id: int().primaryKey({ autoIncrement: true }),
+    token: text().primaryKey(),
     user_id: int().notNull().references(() => users.id),
-    session_token: text().notNull().unique(),
     expires_at: int().notNull()
 });
 
 
 /**
- * @deprecated Use TableSchema.domains instead
+ * @deprecated Use DB.Schema.domains instead
  */
 export const domains = sqliteTable('domains', {
     id: int().primaryKey({ autoIncrement: true }),
@@ -48,17 +46,10 @@ export const domains = sqliteTable('domains', {
 });
 
 /**
- * @deprecated Use TableSchema.systemConfigs instead
+ * @deprecated Use DB.Schema.systemConfigs instead
  */
 export const systemConfigs = sqliteTable('system_configs', {
     key: text().primaryKey(),
     value: text().notNull()
 });
 
-export const TableSchema = {
-    users,
-    domains,
-    passwordResets,
-    sessions,
-    systemConfigs
-};

@@ -1,32 +1,37 @@
 
-import { ddns2 } from "./routes/ddns2";
 import { Logger } from "../utils/logger";
 import z from "zod";
 import { authMiddleware } from "./middleware/auth";
 import { Hono } from "hono";
 
-const routes = {
-    ddns2: (await import('./routes/ddns2')).ddns2,
-    auth: await import('./routes/auth'),
-}
-
-
-
 export class API {
 
-	static async start(port: number, hostname: string) {
-		
-		const app = new Hono()
-			.use(authMiddleware)
-			.use(routes.ddns2);	
+	protected static server: Bun.Server<undefined>;
+	protected static app: Hono;
 
-		if (hostname === "::" || hostname === "0.0.0.0") {
-			app = app.listen({ port, hostname: "0.0.0.0" }).listen({ port, hostname: "::" });
-		} else {
-			app = app.listen({ port, hostname });
+	protected static routers = [
+		(import('./routes/ddns2')),
+		(import('./routes/auth')),
+	];
+
+	static async init() {
+
+		this.app = new Hono();
+
+		// Apply global auth middleware
+		this.app.use(authMiddleware);
+
+		for (const router of this.routers) {
+			this.app.route("/", (await router).router);
 		}
 
-		Logger.log(`API is running at ${app.server?.hostname}:${app.server?.port}`);
+	}
+
+	static async start(port: number, hostname: string) {
+
+		this.server = Bun.serve({ port, hostname, fetch: this.app.fetch });
+
+		Logger.log(`API is running at ${this.server?.hostname}:${this.server?.port}`);
 	}
 
 }

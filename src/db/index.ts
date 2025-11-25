@@ -1,7 +1,6 @@
 import { drizzle } from 'drizzle-orm/bun-sqlite';
 import { Database } from 'bun:sqlite';
-import { TableSchema } from './schema';
-
+import * as TableSchema from './schema';
 
 export type DrizzleDB = ReturnType<typeof drizzle>;
 
@@ -12,7 +11,7 @@ export class DB {
     static async init(path: string) {
         this.db = drizzle(path);
 
-        this.db.insert(TableSchema.systemConfigs).values({
+        this.db.insert(DB.Schema.systemConfigs).values({
             key: 'dns_serial',
             value: '0'
         }).onConflictDoNothing().run();
@@ -25,4 +24,13 @@ export class DB {
         return DB.db;
     }
 
+}
+
+
+export namespace DB.Schema {
+    export const users = TableSchema.users;
+    export const passwordResets = TableSchema.passwordResets;
+    export const sessions = TableSchema.sessions;
+    export const domains = TableSchema.domains;
+    export const systemConfigs = TableSchema.systemConfigs;
 }

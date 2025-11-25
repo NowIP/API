@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "701795e0-e4d3-4fc0-9427-3445faecf489",
+  "id": "afd89d00-5b1d-4c46-b25f-d94a1b8788ee",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "domains": {
@@ -81,23 +81,16 @@
     "password_resets": {
       "name": "password_resets",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "integer",
+        "token": {
+          "name": "token",
+          "type": "text",
           "primaryKey": true,
           "notNull": true,
-          "autoincrement": true
+          "autoincrement": false
         },
         "user_id": {
           "name": "user_id",
           "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "reset_token": {
-          "name": "reset_token",
-          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -110,15 +103,7 @@
           "autoincrement": false
         }
       },
-      "indexes": {
-        "password_resets_reset_token_unique": {
-          "name": "password_resets_reset_token_unique",
-          "columns": [
-            "reset_token"
-          ],
-          "isUnique": true
-        }
-      },
+      "indexes": {},
       "foreignKeys": {
         "password_resets_user_id_users_id_fk": {
           "name": "password_resets_user_id_users_id_fk",
@@ -141,23 +126,16 @@
     "sessions": {
       "name": "sessions",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "integer",
+        "token": {
+          "name": "token",
+          "type": "text",
           "primaryKey": true,
           "notNull": true,
-          "autoincrement": true
+          "autoincrement": false
         },
         "user_id": {
           "name": "user_id",
           "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "session_token": {
-          "name": "session_token",
-          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -170,15 +148,7 @@
           "autoincrement": false
         }
       },
-      "indexes": {
-        "sessions_session_token_unique": {
-          "name": "sessions_session_token_unique",
-          "columns": [
-            "session_token"
-          ],
-          "isUnique": true
-        }
-      },
+      "indexes": {},
       "foreignKeys": {
         "sessions_user_id_users_id_fk": {
           "name": "sessions_user_id_users_id_fk",

@@ -10,7 +10,7 @@
     "start": "bun run src/index.ts"
   },
   "dependencies": {
-    "@hono/zod-openapi": "^1.1.5",
+    "@hono/zod-validator": "^0.7.5",
     "better-dns": "^1.2.0",
     "drizzle-orm": "^0.44.7",
     "drizzle-zod": "^0.8.3",
@@ -18,7 +18,6 @@
     "zod": "^4.1.13"
   },
   "devDependencies": {
-    "better-sqlite3": "^12.4.6",
     "bun-types": "latest",
     "drizzle-kit": "^0.31.7"
   },
