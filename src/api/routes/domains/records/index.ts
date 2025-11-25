@@ -41,6 +41,15 @@ router.post('/',
 
         const recordData = c.req.valid("json");
 
+        if (recordData.subdomain === "@") {
+            if (recordData.type === "CNAME") {
+                return APIRes.badRequest(c, "The '@' subdomain cannot have CNAME records as it would conflict with the domain apex records");
+            }
+            if (recordData.type === "A" || recordData.type === "AAAA") {
+                return APIRes.badRequest(c, "The '@' subdomain cannot have A or AAAA records as they would conflict with the ddns generated records");
+            }
+        }
+
         const recordSchema = DNSRecordDataSchemas[recordData.type as keyof typeof DNSRecordDataSchemas];
         if (!recordSchema) {
             return APIRes.badRequest(c, "Unsupported DNS record type");
@@ -51,7 +60,7 @@ router.post('/',
             return APIRes.badRequest(c, "Invalid DNS record data for type " + recordData.type);
         }
 
-        const result = DB.instance().insert(DB.Schema.additionalDnsRecords).values({
+        DB.instance().insert(DB.Schema.additionalDnsRecords).values({
             ...recordData,
             domain_id: domain.id
         }).returning().get();
@@ -89,7 +98,7 @@ router.use('/:id/*',
 router.get('/:id',
     async (c) => {
         // @ts-ignore
-        const record = c.get("record") as DB.Models.AdditionalDnsRecord;
+        const record = c.get("record") as DB.Models.AdditionalDNSRecord;
 
         console.log(record);
 
@@ -100,7 +109,7 @@ router.get('/:id',
 router.delete('/:id',
     async (c) => {
         // @ts-ignore
-        const record = c.get("record") as DB.Models.AdditionalDnsRecord;
+        const record = c.get("record") as DB.Models.AdditionalDNSRecord;
 
         await DB.instance().delete(DB.Schema.additionalDnsRecords).where(eq(DB.Schema.additionalDnsRecords.id, record.id));
 
@@ -115,8 +124,27 @@ router.put('/:id',
     async (c) => {
         const recordData = c.req.valid("json");
         // @ts-ignore
-        const record = c.get("record") as DB.Models.AdditionalDnsRecord;
+        const record = c.get("record") as DB.Models.AdditionalDNSRecord;
 
+        if (recordData.subdomain === "@") {
+            if (recordData.type === "CNAME") {
+                return APIRes.badRequest(c, "The '@' subdomain cannot have CNAME records as it would conflict with the domain apex records");
+            }
+            if (recordData.type === "A" || recordData.type === "AAAA") {
+                return APIRes.badRequest(c, "The '@' subdomain cannot have A or AAAA records as they would conflict with the ddns generated records");
+            }
+        }
+
+        const recordSchema = DNSRecordDataSchemas[(recordData.type ?? record.type) as keyof typeof DNSRecordDataSchemas];
+        if (!recordSchema) {
+            return APIRes.badRequest(c, "Unsupported DNS record type");
+        }
+
+        const parseResult = recordSchema.safeParse(recordData.record_data ?? record.record_data);
+        if (!parseResult.success) {
+            return APIRes.badRequest(c, "Invalid DNS record data for type " + (recordData.type ?? record.type));
+        }
+        
         await DB.instance().update(DB.Schema.additionalDnsRecords).set({
             ...recordData
         }).where(eq(DB.Schema.additionalDnsRecords.id, record.id));

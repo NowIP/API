@@ -88,21 +88,23 @@ export class DNSHybridRecordStore extends AbstractDNSRecordStore {
 
     async getRecords(name: string, type: DNSRecords.TYPES): Promise<DNSRecords.RecordData[]> {
 
-        if (name === this.settings.baseDomain || name === "ns." + this.settings.baseDomain) {
-            return this.baseZone.getRecords(name, type);
-        }
-
-        if (type !== DNSRecords.TYPE.A && type !== DNSRecords.TYPE.AAAA) {
-            return [];
+        const baseDomainRecordData = this.baseZone.getRecords(name, type);
+        if (baseDomainRecordData.length > 0) {
+            return baseDomainRecordData;
         }
 
         const subdomain = name.endsWith("." + this.settings.baseDomain)
             ? name.slice(0, name.length - this.settings.baseDomain.length - 1)
             : name;
 
-        if (!subdomain || subdomain.includes('.')) {
+        if (!subdomain) {
             return [];
         }
+
+        if (subdomain.includes('.')) {
+            
+        }
+        
 
         const result = (await DB.instance().select()
             .from(DB.Schema.domains)
