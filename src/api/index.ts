@@ -36,17 +36,9 @@ export class API {
 				const res = err.getResponse();
 				let body: any;
 
-				try {
-					// Hono puts zod issues into the response body
-					body = JSON.parse(await res.text())
-				} catch {
-					body = { error: 'Invalid input' }
-				}
-
 				return c.json({
 					success: false,
-					message: 'Your input is invalid',
-					details: body
+					message: 'Your input is invalid'
 				}, err.status)
 			}
 
