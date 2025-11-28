@@ -14,6 +14,8 @@ export class DB {
 
         await this.createInitialSystemConfigsIfNeeded();
         await this.createInitialAdminUserIfNeeded();
+
+        console.log('Database initialized at');
     }
 
     static async createInitialAdminUserIfNeeded() {
