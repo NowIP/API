@@ -2,6 +2,7 @@ import { DDNS2Model } from './model'
 import { Hono } from 'hono';
 import { Logger } from '../../../utils/logger';
 import { describeRoute, validator as zValidator } from 'hono-openapi';
+import { validator as honoValidator } from 'hono/validator';
 import { DB } from '../../../db';
 import { eq, and } from 'drizzle-orm';
 
@@ -15,9 +16,9 @@ router.get(
 		description: "Endpoint for updating domain IP addresses using the DDNSv2 protocol.",
 		tags: ["DDNSv2"],
 
-		security: [
-			{ ddnsv2BasicAuth: [] }
-		],
+		security: [{
+			ddnsv2BasicAuth: []
+		}],
 
 		responses: {
 			200: {
@@ -46,7 +47,13 @@ router.get(
 	}),
 
 	zValidator("query", DDNS2Model.Update.Query),
-	zValidator("header", DDNS2Model.Update.AuthHeader),
+	honoValidator("header", (value, c) => {
+		const result = DDNS2Model.Update.AuthHeader.safeParse(value);
+		if (!result.success) {
+			return c.text("badauth", 401);
+		}
+		return result.data;
+	}),
 
 	async (c) => {
 		const basicAuthHeader = c.req.valid("header").authorization;
