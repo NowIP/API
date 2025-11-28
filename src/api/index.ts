@@ -15,6 +15,7 @@ export class API {
 		(import('./routes/ddns2')),
 		(import('./routes/auth')),
 		(import('./routes/domains')),
+		(import('./routes/account')),
 	];
 
 	static async init(

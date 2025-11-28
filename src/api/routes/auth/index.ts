@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { Model } from './model'
-import { resolver, validator as zValidator } from "hono-openapi";
+import { validator as zValidator } from "hono-openapi";
 import { DB } from "../../../db";
 import { eq } from "drizzle-orm";
 import { APIResponse } from "../../utils/api-res";
