@@ -26,4 +26,17 @@ export class Utils {
         return result;
     }
 
+    static mergeObjects<T extends object[]>(...objects: T): Utils.MergeArray<T> {
+        return Object.assign({}, ...objects) as Utils.MergeArray<T>;
+    }
+
+}
+
+export namespace Utils {
+
+    export type MergeArray<T extends object[]> =
+        T extends [infer First, ...infer Rest]
+            ? First & MergeArray<Rest extends object[] ? Rest : []>
+            : {};
+
 }

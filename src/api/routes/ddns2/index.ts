@@ -5,19 +5,20 @@ import { describeRoute, validator as zValidator } from 'hono-openapi';
 import { validator as honoValidator } from 'hono/validator';
 import { DB } from '../../../db';
 import { eq, and } from 'drizzle-orm';
+import { APIRouteSpec } from './specHelpers';
 
 export const router = new Hono();
 
 router.get(
 	'/nic/update',
 
-	describeRoute({
+	APIRouteSpec.custom({
 		summary: "DDNSv2 Update",
 		description: "Endpoint for updating domain IP addresses using the DDNSv2 protocol.",
 		tags: ["DDNSv2"],
 
 		security: [{
-			ddnsv2BasicAuth: []
+			basicAuth: []
 		}],
 
 		responses: {
@@ -39,6 +40,17 @@ router.get(
 						schema: {
 							type: "string",
 							example: "badauth"
+						}
+					}
+				}
+			},
+			400: {
+				description: "Bad request due to missing or invalid parameters",
+				content: {
+					"text/plain": {
+						schema: {
+							type: "string",
+							example: "badrequest"
 						}
 					}
 				}

@@ -2,9 +2,9 @@ import { Hono } from "hono";
 import { DB } from "../../../db";
 import { APIResponse } from "../../utils/api-res";
 import { eq, and } from "drizzle-orm";
-import { describeRoute, validator as zValidator } from "hono-openapi";
+import { describeRoute, describeResponse, validator as zValidator } from "hono-openapi";
 import { z } from "zod";
-import { createInsertSchema, createUpdateSchema } from "drizzle-zod";
+import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-zod";
 import { randomBytes as crypto_randomBytes } from 'crypto';
 import { router as records_router } from "./records";
 
@@ -13,28 +13,36 @@ export const router = new Hono().basePath('/domains');
 router.get('/',
 
     describeRoute({
-        summary: "List Domains",
+        summary: "Get All Domains",
         description: "Retrieve a list of all domains owned by the authenticated user.",
         tags: ["Domains"],
 
-        responses: {
-            200: {
-                description: "A list of domains owned by the user",
-            },
-            401: {
-                description: "Authentication information is missing or invalid",
-            },
-        },
+        
     }),
 
-    async (c) => {
-        // @ts-ignore
-        const session = c.get("session") as DB.Models.Session;
+    describeResponse(
+        async (c) => {
+            // @ts-ignore
+            const session = c.get("session") as DB.Models.Session;
 
-        const domains = DB.instance().select().from(DB.Schema.domains).where(eq(DB.Schema.domains.owner_id, session.user_id)).all();
+            const domains = DB.instance().select().from(DB.Schema.domains).where(eq(DB.Schema.domains.owner_id, session.user_id)).all();
 
-        return APIResponse.success(c, "Domains retrieved successfully", domains);
-    }
+            return APIResponse.success(c, "Domains retrieved successfully", domains);
+        },{
+            200: {
+                description: "A list of domains owned by the user",
+                content: {
+                    "application/json": {
+                        vSchema: z.object({
+                            success: z.literal(true),
+                            message: z.string(),
+                            data: z.array(createSelectSchema(DB.Schema.domains))
+                        })
+                    }
+                }
+            }
+        }
+    )
 );
 
 router.post('/',

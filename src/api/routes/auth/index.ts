@@ -11,7 +11,7 @@ export const router = new Hono().basePath('/auth');
 
 router.post('/login',
 
-    APIRouteSpec.basic({
+    APIRouteSpec.unauthenticated({
         summary: "User Login",
         description: "Authenticate a user with their username and password",
 
