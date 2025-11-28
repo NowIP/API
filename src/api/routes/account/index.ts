@@ -131,7 +131,7 @@ router.post('/logout',
         const session = c.get("session") as DB.Models.Session;
 
         DB.instance().delete(DB.Schema.sessions).where(
-            eq(DB.Schema.sessions.user_id, session.user_id)
+            eq(DB.Schema.sessions.token, session.token)
         ).run();
 
         return APIResponse.successNoData(c, "Logged out successfully");
