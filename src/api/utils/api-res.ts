@@ -1,12 +1,17 @@
 import { Context } from "hono";
 
-export class APIRes {
+// Can be JSON object or Array
+type RequiredReturnData = { [key: string]: any } | Array<any>;
 
-    static success<Data>(c: Context, data: Data, message?: string) {
+type NonRequiredReturnData = null | RequiredReturnData;
+
+export class APIResponse {
+
+    static success<Data extends NonRequiredReturnData>(c: Context, message: string, data: Data) {
         return c.json({ success: true, message, data });
     }
 
-    static created<Data>(c: Context, data: Data, message?: string) {
+    static created<Data extends RequiredReturnData>(c: Context, message: string, data: Data) {
         return c.json({ success: true, message, data }, 201);
     }
 

@@ -3,7 +3,7 @@ import { validator as zValidator } from "hono-openapi";
 import { z } from "zod";
 import { DB } from "../../../../db";
 import { eq, and } from "drizzle-orm";
-import { APIRes } from "../../../utils/api-res";
+import { APIResponse } from "../../../utils/api-res";
 import { createInsertSchema, createUpdateSchema } from "drizzle-zod";
 import { DNSRecordDataSchemas } from "../../../../dns-server/utils";
 
@@ -23,7 +23,7 @@ router.get('/',
             eq(DB.Schema.additionalDnsRecords.domain_id, domain.id)
         )).all();
 
-        return APIRes.success(c, records); 
+        return APIResponse.success(c, "Records retrieved successfully", records);
     }
 );
 
@@ -43,29 +43,29 @@ router.post('/',
 
         if (recordData.subdomain === "@") {
             if (recordData.type === "CNAME") {
-                return APIRes.badRequest(c, "The '@' subdomain cannot have CNAME records as it would conflict with the domain apex records");
+                return APIResponse.badRequest(c, "The '@' subdomain cannot have CNAME records as it would conflict with the domain apex records");
             }
             if (recordData.type === "A" || recordData.type === "AAAA") {
-                return APIRes.badRequest(c, "The '@' subdomain cannot have A or AAAA records as they would conflict with the ddns generated records");
+                return APIResponse.badRequest(c, "The '@' subdomain cannot have A or AAAA records as they would conflict with the ddns generated records");
             }
         }
 
         const recordSchema = DNSRecordDataSchemas[recordData.type as keyof typeof DNSRecordDataSchemas];
         if (!recordSchema) {
-            return APIRes.badRequest(c, "Unsupported DNS record type");
+            return APIResponse.badRequest(c, "Unsupported DNS record type");
         }
 
         const parseResult = recordSchema.safeParse(recordData.record_data);
         if (!parseResult.success) {
-            return APIRes.badRequest(c, "Invalid DNS record data for type " + recordData.type);
+            return APIResponse.badRequest(c, "Invalid DNS record data for type " + recordData.type);
         }
 
-        DB.instance().insert(DB.Schema.additionalDnsRecords).values({
+        const result = DB.instance().insert(DB.Schema.additionalDnsRecords).values({
             ...recordData,
             domain_id: domain.id
         }).returning().get();
 
-        return APIRes.created(c, "DNS record created successfully");
+        return APIResponse.created(c, "DNS record created successfully", { id: result.id });
     }   
 );
 
@@ -86,7 +86,7 @@ router.use('/:recordID/*',
         )).get();
 
         if (!record) {
-            return APIRes.notFound(c, "Record with specified ID not found");
+            return APIResponse.notFound(c, "Record with specified ID not found");
         }
         // @ts-ignore
         c.set("record", record);
@@ -102,7 +102,7 @@ router.get('/:recordID',
 
         console.log(record);
 
-        return APIRes.success(c, record);
+        return APIResponse.success(c, "Record retrieved successfully", record);
     }
 );
 
@@ -117,28 +117,28 @@ router.put('/:recordID',
 
         if (recordData.subdomain === "@") {
             if (recordData.type === "CNAME") {
-                return APIRes.badRequest(c, "The '@' subdomain cannot have CNAME records as it would conflict with the domain apex records");
+                return APIResponse.badRequest(c, "The '@' subdomain cannot have CNAME records as it would conflict with the domain apex records");
             }
             if (recordData.type === "A" || recordData.type === "AAAA") {
-                return APIRes.badRequest(c, "The '@' subdomain cannot have A or AAAA records as they would conflict with the ddns generated records");
+                return APIResponse.badRequest(c, "The '@' subdomain cannot have A or AAAA records as they would conflict with the ddns generated records");
             }
         }
 
         const recordSchema = DNSRecordDataSchemas[(recordData.type ?? record.type) as keyof typeof DNSRecordDataSchemas];
         if (!recordSchema) {
-            return APIRes.badRequest(c, "Unsupported DNS record type");
+            return APIResponse.badRequest(c, "Unsupported DNS record type");
         }
 
         const parseResult = recordSchema.safeParse(recordData.record_data ?? record.record_data);
         if (!parseResult.success) {
-            return APIRes.badRequest(c, "Invalid DNS record data for type " + (recordData.type ?? record.type));
+            return APIResponse.badRequest(c, "Invalid DNS record data for type " + (recordData.type ?? record.type));
         }
         
         await DB.instance().update(DB.Schema.additionalDnsRecords).set({
             ...recordData
         }).where(eq(DB.Schema.additionalDnsRecords.id, record.id));
 
-        return APIRes.success(c, null, "Record updated successfully");
+        return APIResponse.success(c, "Record updated successfully", null);
     }
 );
 
@@ -149,6 +149,6 @@ router.delete('/:recordID',
 
         await DB.instance().delete(DB.Schema.additionalDnsRecords).where(eq(DB.Schema.additionalDnsRecords.id, record.id));
 
-        return APIRes.success(c, null, "Record deleted successfully");
+        return APIResponse.success(c, "Record deleted successfully", null);
     }
 );

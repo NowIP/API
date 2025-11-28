@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { DB } from "../../../db";
-import { APIRes } from "../../utils/api-res";
+import { APIResponse } from "../../utils/api-res";
 import { eq, and } from "drizzle-orm";
 import { describeRoute, validator as zValidator } from "hono-openapi";
 import { z } from "zod";
@@ -33,7 +33,7 @@ router.get('/',
 
         const domains = DB.instance().select().from(DB.Schema.domains).where(eq(DB.Schema.domains.owner_id, session.user_id)).all();
 
-        return APIRes.success(c, domains);
+        return APIResponse.success(c, "Domains retrieved successfully", domains);
     }
 );
 
@@ -57,7 +57,7 @@ router.post('/',
 
         const existingDomain = DB.instance().select().from(DB.Schema.domains).where(eq(DB.Schema.domains.subdomain, domainData.subdomain)).get();
         if (existingDomain) {
-            return APIRes.conflict(c, "Domain with this subdomain already exists");
+            return APIResponse.conflict(c, "Domain with this subdomain already exists");
         }
 
         const result = DB.instance().insert(DB.Schema.domains).values({
@@ -66,7 +66,7 @@ router.post('/',
             ddnsv2_api_secret: crypto_randomBytes(16).toString('hex')
         }).returning().get();
 
-        return APIRes.created(c, { id: result.id }, "Domain created successfully");
+        return APIResponse.created(c, "Domain created successfully", { id: result.id });
     }
 );
 
@@ -87,7 +87,7 @@ router.use('/:domainID/*',
         )).get();
 
         if (!domain) {
-            return APIRes.notFound(c, "Domain with specified ID not found");
+            return APIResponse.notFound(c, "Domain with specified ID not found");
         }
         // @ts-ignore
         c.set("domain", domain);
@@ -101,7 +101,7 @@ router.get('/:domainID',
         // @ts-ignore
         const domain = c.get("domain") as DB.Models.Domain;
 
-        return APIRes.success(c, domain);
+        return APIResponse.success(c, "Domain retrieved successfully", domain);
     }
 );
 
@@ -112,7 +112,7 @@ router.delete('/:domainID',
 
         await DB.instance().delete(DB.Schema.domains).where(eq(DB.Schema.domains.id, domain.id));
 
-        return APIRes.success(c, null, "Domain deleted successfully");
+        return APIResponse.success(c, "Domain deleted successfully", null);
     }
 );
 
@@ -131,7 +131,7 @@ router.put('/:domainID',
             ...domainData
         }).where(eq(DB.Schema.domains.id, domain.id));
 
-        return APIRes.success(c, null, "Domain updated successfully");
+        return APIResponse.success(c, "Domain updated successfully", null);
     }
 );
 

@@ -31,9 +31,12 @@ const openAPIConfig: Partial<GenerateSpecOptions> = {
                 },
             },
         },
-        security: [{
-            bearerAuth: []
-        }],
+
+        // Disable global security because Scalar could not handle multiple security schemes properly
+        // security: [{
+        //     bearerAuth: []
+        // }],
+
         servers: [
             {
                 url: "http://localhost:3003",
