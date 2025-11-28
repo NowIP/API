@@ -5,7 +5,7 @@ import { DB } from "../../../db";
 import { eq } from "drizzle-orm";
 import { APIResponse } from "../../utils/api-res";
 import { APIResponseSpec, APIRouteSpec } from "../../utils/specHelpers";
-import { de } from "zod/v4/locales";
+import { SessionHandler } from "../../utils/sessionHandler";
 
 export const router = new Hono().basePath('/account');
 
@@ -108,7 +108,33 @@ router.put('/password',
             eq(DB.Schema.users.id, session.user_id)
         ).run();
 
+        SessionHandler.inValidateAllSessionsForUser(session.user_id);
+
         return APIResponse.successNoData(c, "Password changed successfully");
+    },
+);
+
+router.post('/logout',
+
+    APIRouteSpec.authenticated({
+        summary: "Logout from current session",
+        description: "Logs out the authenticated user from the current session.",
+        tags: ['Account'],
+
+        responses: APIResponseSpec.describeBasic(
+            APIResponseSpec.successNoData("Logged out successfully")
+        )
+    }),
+
+    async (c) => {
+        // @ts-ignore
+        const session = c.get("session") as DB.Models.Session;
+
+        DB.instance().delete(DB.Schema.sessions).where(
+            eq(DB.Schema.sessions.id, session.id)
+        ).run();
+
+        return APIResponse.successNoData(c, "Logged out successfully");
     },
 );
 
