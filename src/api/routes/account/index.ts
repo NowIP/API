@@ -59,21 +59,56 @@ router.put('/',
 
         const body = c.req.valid("json") as AccountModel.UpdateInfo.Body;
 
-        const updateData: Partial<DB.Models.User> = {
-            ...body
-        }
-
-        if (body.password) {
-            // @ts-ignore
-            delete updateData.password;
-            updateData.password_hash = await Bun.password.hash(body.password);
-        }
-
-        DB.instance().update(DB.Schema.users).set(updateData).where(
+        DB.instance().update(DB.Schema.users).set(body).where(
             eq(DB.Schema.users.id, session.user_id)
         ).run();
 
         return APIResponse.successNoData(c, "Account information updated successfully");
+    },
+);
+
+router.put('/password',
+
+    APIRouteSpec.authenticated({
+        summary: "Change account password",
+        description: "Change the password of the authenticated user's account.",
+        tags: ['Account'],
+
+        responses: APIResponseSpec.describeWithWrongInputs(
+            APIResponseSpec.successNoData("Password changed successfully"),
+            APIResponseSpec.unauthorized("Current password is incorrect")
+        )
+    }),
+
+    validator("json", AccountModel.UpdatePassword.Body),
+
+    async (c) => {
+        // @ts-ignore
+        const session = c.get("session") as DB.Models.Session;
+
+        const body = c.req.valid("json")
+
+        const user = DB.instance().select().from(DB.Schema.users).where(
+            eq(DB.Schema.users.id, session.user_id)
+        ).get();
+    
+        if (!user) {
+            throw new Error("User not found but session exists");
+        }
+
+        if ((await Bun.password.verify(body.current_password, user.password_hash)) === false) {
+            return APIResponse.unauthorized(c, "Current password is incorrect");
+        }
+
+        const newPasswordHash = await Bun.password.hash(body.new_password);
+
+        DB.instance().update(DB.Schema.users).set({
+            password_hash: newPasswordHash
+        }).where(
+            eq(DB.Schema.users.id, session.user_id)
+        ).run();
+
+        return APIResponse.successNoData(c, "Password changed successfully");
     },
 );
 
