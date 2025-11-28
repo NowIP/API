@@ -1,11 +1,11 @@
 import { Hono } from "hono";
 import { Model } from './model'
-import { describeRoute, resolver, validator as zValidator } from "hono-openapi";
+import { resolver, validator as zValidator } from "hono-openapi";
 import { DB } from "../../../db";
 import { eq } from "drizzle-orm";
 import { APIResponse } from "../../utils/api-res";
 import { SessionHandler } from "../../utils/sessionHandler";
-import { APIRouteSpec } from "../ddns2/specHelpers";
+import { APIResponseSpec, APIRouteSpec } from "../../utils/specHelpers";
 
 export const router = new Hono().basePath('/auth');
 
@@ -14,25 +14,12 @@ router.post('/login',
     APIRouteSpec.unauthenticated({
         summary: "User Login",
         description: "Authenticate a user with their username and password",
+        tags: ["Authentication"],
 
-        responses: {
-            200: {
-                description: "Login successful, returns session information",
-                content: {
-                    "application/json": {
-                        schema: resolver(Model.Login.OKResponse)
-                    }
-                }
-            },
-            401: {
-                description: "Invalid username or password",
-                content: {
-                    "application/json": {
-                        schema: resolver(Model.Login.ErrorResponse)
-                    }
-                }
-            },
-        },
+        responses: APIResponseSpec.describeWithWrongInputs(
+            APIResponseSpec.success("Login successful", Model.Login.Response),
+            APIResponseSpec.unauthorized("Unauthorized: Invalid username or password"),
+        ),
 
     }),
 

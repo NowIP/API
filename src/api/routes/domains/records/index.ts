@@ -6,14 +6,22 @@ import { eq, and } from "drizzle-orm";
 import { APIResponse } from "../../../utils/api-res";
 import { createInsertSchema, createUpdateSchema } from "drizzle-zod";
 import { DNSRecordDataSchemas } from "../../../../dns-server/utils";
+import { APIResponseSpec, APIRouteSpec } from "../../../utils/specHelpers";
+import { RecordModel } from "./model";
 
 export const router = new Hono().basePath('/:domainID/records');
 
 router.get('/',
 
-    zValidator("param", z.object({
-        id: z.string().transform((val) => parseInt(val, 10))
-    })),
+    APIRouteSpec.authenticated({
+        summary: "Get All DNS Records for Domain",
+        description: "Retrieve a list of all additional DNS records for the specified domain owned by the authenticated user.",
+        tags: ["Domains", "DNS Records"],
+
+        responses: APIResponseSpec.describeBasic(
+            APIResponseSpec.success("Records retrieved successfully", RecordModel.GetRecords.Response)
+        )
+    }),
 
     async (c) => {
         // @ts-ignore
@@ -29,6 +37,17 @@ router.get('/',
 
 
 router.post('/',
+
+    APIRouteSpec.authenticated({
+        summary: "Create DNS Record for Domain",
+        description: "Create a new additional DNS record for the specified domain owned by the authenticated user.",
+        tags: ["Domains", "DNS Records"],
+
+        responses: APIResponseSpec.describeWithWrongInputs(
+            APIResponseSpec.success("DNS record created successfully", z.object({ id: z.number() })),
+            APIResponseSpec.badRequest("Bad Request: Invalid DNS record data or subdomain"),
+        )
+    }),
 
     zValidator("json", createInsertSchema(DB.Schema.additionalDnsRecords, {
         subdomain: z.string().min(1).max(50),
@@ -70,9 +89,11 @@ router.post('/',
 );
 
 router.use('/:recordID/*',
+
     zValidator("param", z.object({
         recordID: z.string().transform((val) => parseInt(val, 10))
     })),
+
     async (c, next) => {
         // @ts-ignore
         const { recordID } = c.req.valid("param");
@@ -96,6 +117,18 @@ router.use('/:recordID/*',
 );
 
 router.get('/:recordID',
+
+    APIRouteSpec.authenticated({
+        summary: "Get DNS Record",
+        description: "Retrieve details of a specific additional DNS record for the specified domain owned by the authenticated user.",
+        tags: ["Domains", "DNS Records"],
+
+        responses: APIResponseSpec.describeBasic(
+            APIResponseSpec.success("Record retrieved successfully", RecordModel.GetRecord.Response),
+            APIResponseSpec.notFound("Record with specified ID not found")
+        )
+    }),
+
     async (c) => {
         // @ts-ignore
         const record = c.get("record") as DB.Models.AdditionalDNSRecord;
@@ -107,9 +140,22 @@ router.get('/:recordID',
 );
 
 router.put('/:recordID',
+
+    APIRouteSpec.authenticated({
+        summary: "Update DNS Record",
+        description: "Update a specific additional DNS record for the specified domain owned by the authenticated user.",
+        tags: ["Domains", "DNS Records"],
+
+        responses: APIResponseSpec.describeWithWrongInputs(
+            APIResponseSpec.successNoData("Record updated successfully"),
+            APIResponseSpec.notFound("Record with specified ID not found")
+        )
+    }),
+
     zValidator("json", createUpdateSchema(DB.Schema.additionalDnsRecords, {
         subdomain: z.string().min(1).max(50),
     }).omit({ id: true, domain_id: true })),
+
     async (c) => {
         const recordData = c.req.valid("json");
         // @ts-ignore
@@ -138,17 +184,29 @@ router.put('/:recordID',
             ...recordData
         }).where(eq(DB.Schema.additionalDnsRecords.id, record.id));
 
-        return APIResponse.success(c, "Record updated successfully", null);
+        return APIResponse.successNoData(c, "Record updated successfully");
     }
 );
 
 router.delete('/:recordID',
+
+    APIRouteSpec.authenticated({
+        summary: "Delete DNS Record",
+        description: "Delete a specific additional DNS record for the specified domain owned by the authenticated user.",
+        tags: ["Domains", "DNS Records"],
+
+        responses: APIResponseSpec.describeBasic(
+            APIResponseSpec.successNoData("Record deleted successfully"),
+            APIResponseSpec.notFound("Record with specified ID not found")
+        )
+    }),
+
     async (c) => {
         // @ts-ignore
         const record = c.get("record") as DB.Models.AdditionalDNSRecord;
 
         await DB.instance().delete(DB.Schema.additionalDnsRecords).where(eq(DB.Schema.additionalDnsRecords.id, record.id));
 
-        return APIResponse.success(c, "Record deleted successfully", null);
+        return APIResponse.successNoData(c, "Record deleted successfully");
     }
 );

@@ -1,4 +1,4 @@
-import { success, z } from "zod";
+import { z } from "zod";
 
 export namespace Model.Login {
 
@@ -6,23 +6,11 @@ export namespace Model.Login {
         username: z.string(),
         password: z.string()
     });
-
     export type Body = z.infer<typeof Body>;
 
-    export const OKResponse = z.object({
-        success: z.literal(true),
-        data : z.object({
-            sessionToken: z.string()
-        })
+    export const Response = z.object({
+        sessionToken: z.string()
     });
-
-    export type OKResponse = z.infer<typeof OKResponse>;
-
-    export const ErrorResponse = z.object({
-        success: z.literal(false),
-        message: z.string()
-    });
-
-    export type ErrorResponse = z.infer<typeof ErrorResponse>;
+    export type Response = z.infer<typeof Response>;
 }
 

@@ -3,15 +3,19 @@ import { z } from "zod";
 
 export class APIResponse {
 
-    static success<Data extends APIResponse.Types.NonRequiredReturnData>(c: Context, message: string, data: Data) {
+    static success<Data extends APIResponse.Types.RequiredReturnData>(c: Context, message: string, data: Data) {
         return c.json({ success: true, message, data }, 200);
+    }
+
+    static successNoData(c: Context, message: string) {
+        return c.json({ success: true, message, data: null }, 200);
     }
 
     static created<Data extends APIResponse.Types.RequiredReturnData>(c: Context, message: string, data: Data) {
         return c.json({ success: true, message, data }, 201);
     }
 
-    static error(c: Context, message: string) {
+    static serverError(c: Context, message: string) {
         return c.json({ success: false, message }, 500);
     }
 
@@ -29,6 +33,17 @@ export class APIResponse {
 
     static conflict(c: Context, message: string) {
         return c.json({ success: false, message }, 409);
+    }
+
+}
+
+export namespace APIResponse.Utils {
+
+    export function genericErrorSchema<Message extends string>(message: Message) {
+        return z.object({
+            success: z.literal(false),
+            message: z.literal(message),
+        }); 
     }
 
 }
@@ -51,7 +66,7 @@ export namespace APIResponse.Schema {
         });
     }
 
-    export const error = APIResponse.Utils.genericErrorSchema;
+    export const serverError = APIResponse.Utils.genericErrorSchema;
     export const unauthorized = APIResponse.Utils.genericErrorSchema;
     export const badRequest = APIResponse.Utils.genericErrorSchema;
     export const notFound = APIResponse.Utils.genericErrorSchema;
@@ -68,21 +83,10 @@ export namespace APIResponse.Types {
     export type BasicResponseSchema =
         | z.infer<ReturnType<typeof APIResponse.Schema.success<any, z.ZodType<NonRequiredReturnData>>>>
         | z.infer<ReturnType<typeof APIResponse.Schema.created<any, z.ZodType<RequiredReturnData>>>>
-        | z.infer<ReturnType<typeof APIResponse.Schema.error<any>>>
+        | z.infer<ReturnType<typeof APIResponse.Schema.serverError<any>>>
         | z.infer<ReturnType<typeof APIResponse.Schema.unauthorized<any>>>
         | z.infer<ReturnType<typeof APIResponse.Schema.badRequest<any>>>
         | z.infer<ReturnType<typeof APIResponse.Schema.notFound<any>>>
         | z.infer<ReturnType<typeof APIResponse.Schema.conflict<any>>>;
-
-}
-
-export namespace APIResponse.Utils {
-
-    export function genericErrorSchema<Message extends string>(message: Message) {
-        return z.object({
-            success: z.literal(false),
-            message: z.literal(message),
-        }); 
-    }
 
 }

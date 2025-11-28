@@ -7,50 +7,44 @@ import { z } from "zod";
 import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-zod";
 import { randomBytes as crypto_randomBytes } from 'crypto';
 import { router as records_router } from "./records";
+import { APIResponseSpec, APIRouteSpec } from "../../utils/specHelpers";
+import { DomainModel } from "./model";
 
 export const router = new Hono().basePath('/domains');
 
 router.get('/',
 
-    describeRoute({
+    APIRouteSpec.authenticated({
         summary: "Get All Domains",
         description: "Retrieve a list of all domains owned by the authenticated user.",
         tags: ["Domains"],
 
-        
+        responses: APIResponseSpec.describeBasic(
+            APIResponseSpec.success("Domains retrieved successfully", DomainModel.GetDomains.Response),
+        )
     }),
 
-    describeResponse(
-        async (c) => {
-            // @ts-ignore
-            const session = c.get("session") as DB.Models.Session;
+    async (c) => {
+        // @ts-ignore
+        const session = c.get("session") as DB.Models.Session;
 
-            const domains = DB.instance().select().from(DB.Schema.domains).where(eq(DB.Schema.domains.owner_id, session.user_id)).all();
+        const domains = DB.instance().select().from(DB.Schema.domains).where(eq(DB.Schema.domains.owner_id, session.user_id)).all();
 
-            return APIResponse.success(c, "Domains retrieved successfully", domains);
-        },{
-            200: {
-                description: "A list of domains owned by the user",
-                content: {
-                    "application/json": {
-                        vSchema: z.object({
-                            success: z.literal(true),
-                            message: z.string(),
-                            data: z.array(createSelectSchema(DB.Schema.domains))
-                        })
-                    }
-                }
-            }
-        }
-    )
+        return APIResponse.success(c, "Domains retrieved successfully", domains);
+    }
 );
 
 router.post('/',
 
-    describeRoute({
+    APIRouteSpec.authenticated({
         summary: "Create Domain",
         description: "Create a new domain under the authenticated user's account.",
         tags: ["Domains"],
+
+        responses: APIResponseSpec.describeWithWrongInputs(
+            APIResponseSpec.success("Domain created successfully", z.object({ id: z.number() })),
+            APIResponseSpec.conflict("Conflict: Domain with this subdomain already exists")
+        )
     }),
 
     zValidator("json", createInsertSchema(DB.Schema.domains, {
@@ -79,9 +73,11 @@ router.post('/',
 );
 
 router.use('/:domainID/*',
+
     zValidator("param", z.object({
         domainID: z.string().transform((val) => parseInt(val, 10))
     })),
+
     async (c, next) => {
         // @ts-ignore
         const { domainID } = c.req.valid("param");
@@ -105,6 +101,19 @@ router.use('/:domainID/*',
 );
 
 router.get('/:domainID',
+
+    APIRouteSpec.authenticated({
+        summary: "Get Domain",
+        description: "Retrieve details of a specific domain owned by the authenticated user.",
+        tags: ["Domains"],
+
+        responses: APIResponseSpec.describeBasic(
+            APIResponseSpec.success("Domain retrieved successfully", DomainModel.GetDomain.Response),
+            APIResponseSpec.notFound("Domain with specified ID not found")
+        )
+
+    }),
+
     async (c) => {
         // @ts-ignore
         const domain = c.get("domain") as DB.Models.Domain;
@@ -113,18 +122,19 @@ router.get('/:domainID',
     }
 );
 
-router.delete('/:domainID',
-    async (c) => {
-        // @ts-ignore
-        const domain = c.get("domain") as DB.Models.Domain;
-
-        await DB.instance().delete(DB.Schema.domains).where(eq(DB.Schema.domains.id, domain.id));
-
-        return APIResponse.success(c, "Domain deleted successfully", null);
-    }
-);
-
 router.put('/:domainID',
+
+    APIRouteSpec.authenticated({
+        summary: "Update Domain",
+        description: "Update details of a specific domain owned by the authenticated user.",
+        tags: ["Domains"],
+
+        responses: APIResponseSpec.describeWithWrongInputs(
+            APIResponseSpec.successNoData("Domain updated successfully"),
+            APIResponseSpec.notFound("Domain with specified ID not found")
+        )
+    }),
+
     zValidator("json", createUpdateSchema(DB.Schema.domains, {
         subdomain: z.string().min(1).max(50)
     })
@@ -139,8 +149,32 @@ router.put('/:domainID',
             ...domainData
         }).where(eq(DB.Schema.domains.id, domain.id));
 
-        return APIResponse.success(c, "Domain updated successfully", null);
+        return APIResponse.successNoData(c, "Domain updated successfully");
     }
 );
+
+router.delete('/:domainID',
+
+    APIRouteSpec.authenticated({
+        summary: "Delete Domain",
+        description: "Delete a specific domain owned by the authenticated user.",
+        tags: ["Domains"],
+
+        responses: APIResponseSpec.describeBasic(
+            APIResponseSpec.successNoData("Domain deleted successfully"),
+            APIResponseSpec.notFound("Domain with specified ID not found")
+        )
+    }),
+
+    async (c) => {
+        // @ts-ignore
+        const domain = c.get("domain") as DB.Models.Domain;
+
+        await DB.instance().delete(DB.Schema.domains).where(eq(DB.Schema.domains.id, domain.id));
+
+        return APIResponse.successNoData(c, "Domain deleted successfully");
+    }
+);
+
 
 router.route('/', records_router);

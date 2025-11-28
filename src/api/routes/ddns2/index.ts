@@ -5,7 +5,7 @@ import { describeRoute, validator as zValidator } from 'hono-openapi';
 import { validator as honoValidator } from 'hono/validator';
 import { DB } from '../../../db';
 import { eq, and } from 'drizzle-orm';
-import { APIRouteSpec } from './specHelpers';
+import { APIRouteSpec } from '../../utils/specHelpers';
 
 export const router = new Hono();
 
