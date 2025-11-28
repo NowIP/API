@@ -66,5 +66,26 @@ router.get('/session',
     }
 );
 
+router.post('/logout',
 
+    APIRouteSpec.authenticated({
+        summary: "User Logout",
+        description: "Invalidate the current user's session",
+        tags: ["Authentication"],
 
+        responses: APIResponseSpec.describeBasic(
+            APIResponseSpec.successNoData("Logout successful"),
+            APIResponseSpec.unauthorized("Unauthorized: Invalid or missing session token"),
+        )
+
+    }),
+
+    async (c) => {
+        // @ts-ignore
+        const session = c.get("session") as DB.Models.Session;
+
+        await SessionHandler.invalidateSession(session.token);
+
+        return APIResponse.successNoData(c, "Logout successful");
+    }
+);
