@@ -11,9 +11,7 @@ export class SessionHandler {
             expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).getTime() // 7 days from now
         }).returning()
         
-        const sessionToken = result[0].token;
-
-        return { sessionToken };
+        return result[0];
     }
 
     static async getSession(sessionToken: string) {

@@ -43,3 +43,28 @@ router.post('/login',
         return APIResponse.success(c, "Login successful", session);
     }
 );
+
+router.get('/session',
+
+    APIRouteSpec.authenticated({
+        summary: "Get Current Session",
+        description: "Retrieve the current user's session information",
+        tags: ["Authentication"],
+
+        responses: APIResponseSpec.describeBasic(
+            APIResponseSpec.success("Session info retrieved successfully", Model.Session.Response),
+            APIResponseSpec.unauthorized("Unauthorized: Invalid or missing session token"),
+        )
+
+    }),
+
+    async (c) => {
+        // @ts-ignore
+        const session = c.get("session") as DB.Models.Session;
+
+        return APIResponse.success(c, "Session info retrieved successfully", session);
+    }
+);
+
+
+

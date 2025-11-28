@@ -1,4 +1,6 @@
+import { createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
+import { DB } from "../../../db";
 
 export namespace Model.Login {
 
@@ -8,9 +10,13 @@ export namespace Model.Login {
     });
     export type Body = z.infer<typeof Body>;
 
-    export const Response = z.object({
-        sessionToken: z.string()
-    });
+    export const Response = createSelectSchema(DB.Schema.sessions);
     export type Response = z.infer<typeof Response>;
 }
 
+export namespace Model.Session {
+
+    export const Response = createSelectSchema(DB.Schema.sessions);
+    export type Response = z.infer<typeof Response>;
+
+}
