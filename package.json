@@ -11,8 +11,8 @@
     },
     "dependencies": {
         "@hono/standard-validator": "^0.2.0",
-        "@hono/swagger-editor": "^1.0.1",
         "@hono/swagger-ui": "^0.5.2",
+        "@scalar/hono-api-reference": "^0.9.25",
         "better-dns": "^1.2.0",
         "drizzle-orm": "^0.44.7",
         "drizzle-zod": "^0.8.3",

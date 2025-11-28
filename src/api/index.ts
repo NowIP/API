@@ -1,12 +1,10 @@
-import { swaggerUI } from "@hono/swagger-ui";
-import { swaggerEditor } from "@hono/swagger-editor";
 import { Logger } from "../utils/logger";
 import { authMiddleware } from "./middleware/auth";
 import { Hono } from "hono";
 import { prettyJSON } from "hono/pretty-json";
-import { openAPIRouteHandler } from "hono-openapi";
 import { setupDocs } from "./docs";
 import { cors } from "hono/cors";
+import { HTTPException } from 'hono/http-exception'
 
 export class API {
 
@@ -32,6 +30,28 @@ export class API {
 			maxAge: 600,
 			credentials: true,
 		}))
+
+		this.app.onError(async (err, c) => {
+			if (err instanceof HTTPException) {
+				const res = err.getResponse();
+				let body: any;
+
+				try {
+					// Hono puts zod issues into the response body
+					body = JSON.parse(await res.text())
+				} catch {
+					body = { error: 'Invalid input' }
+				}
+
+				return c.json({
+					success: false,
+					message: 'Your input is invalid',
+					details: body
+				}, err.status)
+			}
+
+			return c.json({ success: false, message: 'Internal Server Error' }, 500);
+		})
 
 
 		// Apply global auth middleware

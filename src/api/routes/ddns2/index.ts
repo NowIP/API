@@ -1,4 +1,4 @@
-import { Model } from './model'
+import { DDNS2Model } from './model'
 import { Hono } from 'hono';
 import { Logger } from '../../../utils/logger';
 import { describeRoute, validator as zValidator } from 'hono-openapi';
@@ -11,9 +11,14 @@ router.get(
 	'/nic/update',
 
 	describeRoute({
-		summary: "DDNSv2 Update Endpoint",
+		summary: "DDNSv2 Update",
 		description: "Endpoint for updating domain IP addresses using the DDNSv2 protocol.",
 		tags: ["DDNSv2"],
+
+		security: [
+			{ ddnsv2BasicAuth: [] }
+		],
+
 		responses: {
 			200: {
 				description: "IP address updated successfully",
@@ -40,8 +45,8 @@ router.get(
 		},
 	}),
 
-	zValidator("query", Model.Update.Query),
-	zValidator("header", Model.Update.AuthHeader),
+	zValidator("query", DDNS2Model.Update.Query),
+	zValidator("header", DDNS2Model.Update.AuthHeader),
 
 	async (c) => {
 		const basicAuthHeader = c.req.valid("header").authorization;

@@ -17,8 +17,6 @@ router.get('/',
         description: "Retrieve a list of all domains owned by the authenticated user.",
         tags: ["Domains"],
 
-        security: [{ BearerAuth: [] }],
-
         responses: {
             200: {
                 description: "A list of domains owned by the user",
@@ -40,6 +38,13 @@ router.get('/',
 );
 
 router.post('/',
+
+    describeRoute({
+        summary: "Create Domain",
+        description: "Create a new domain under the authenticated user's account.",
+        tags: ["Domains"],
+    }),
+
     zValidator("json", createInsertSchema(DB.Schema.domains, {
         subdomain: z.string().min(1).max(50),
     })
