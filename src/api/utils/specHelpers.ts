@@ -88,7 +88,7 @@ export class APIResponseSpec {
             description,
             content: {
                 "application/json": {
-                    schema: resolver(APIResponse.Utils.genericErrorSchema(description))
+                    schema: resolver(APIResponse.Utils.genericErrorSchema(statusCode, description))
                 },
             },
         };

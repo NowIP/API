@@ -4,46 +4,53 @@ import { z } from "zod";
 export class APIResponse {
 
     static success<Data extends APIResponse.Types.RequiredReturnData>(c: Context, message: string, data: Data) {
-        return c.json({ success: true, message, data }, 200);
+        return c.json({ success: true, code: 200, message, data }, 200);
     }
 
     static successNoData(c: Context, message: string) {
-        return c.json({ success: true, message, data: null }, 200);
+        return c.json({ success: true, code: 200, message, data: null }, 200);
     }
 
     static created<Data extends APIResponse.Types.RequiredReturnData>(c: Context, message: string, data: Data) {
-        return c.json({ success: true, message, data }, 201);
+        return c.json({ success: true, code: 201, message, data }, 201);
     }
 
     static serverError(c: Context, message: string) {
-        return c.json({ success: false, message }, 500);
+        return c.json({ success: false, code: 500, message }, 500);
     }
 
     static unauthorized(c: Context, message: string) {
-        return c.json({ success: false, message }, 401);
+        return c.json({ success: false, code: 401, message }, 401);
     }
 
     static badRequest(c: Context, message: string) {
-        return c.json({ success: false, message }, 400);
+        return c.json({ success: false, code: 400, message }, 400);
     }
 
     static notFound(c: Context, message: string) {
-        return c.json({ success: false, message }, 404);
+        return c.json({ success: false, code: 404, message }, 404);
     }
 
     static conflict(c: Context, message: string) {
-        return c.json({ success: false, message }, 409);
+        return c.json({ success: false, code: 409, message }, 409);
     }
 
 }
 
 export namespace APIResponse.Utils {
 
-    export function genericErrorSchema<Message extends string>(message: Message) {
+    export function genericErrorSchema<Code extends number, Message extends string>(code: Code, message: Message) {
         return z.object({
             success: z.literal(false),
+            code: z.literal(code),
             message: z.literal(message),
         }); 
+    }
+
+    export function createErrorSchemaFactory<Code extends number>(code: Code) {
+        return function<Message extends string>(message: Message) {
+            return genericErrorSchema(code, message);
+        }
     }
 
 }
@@ -53,6 +60,7 @@ export namespace APIResponse.Schema {
     export function success<Message extends string, Data extends z.ZodType<APIResponse.Types.NonRequiredReturnData>>(message: Message, data: Data) {
         return z.object({
             success: z.literal(true),
+            code: z.literal(200),
             message: z.literal(message),
             data
         });
@@ -61,16 +69,17 @@ export namespace APIResponse.Schema {
     export function created<Message extends string, Data extends z.ZodType<APIResponse.Types.RequiredReturnData>>(message: Message, data: Data) {
         return z.object({
             success: z.literal(true),
+            code: z.literal(201),
             message: z.literal(message),
             data
         });
     }
 
-    export const serverError = APIResponse.Utils.genericErrorSchema;
-    export const unauthorized = APIResponse.Utils.genericErrorSchema;
-    export const badRequest = APIResponse.Utils.genericErrorSchema;
-    export const notFound = APIResponse.Utils.genericErrorSchema;
-    export const conflict = APIResponse.Utils.genericErrorSchema;
+    export const serverError = APIResponse.Utils.createErrorSchemaFactory(500);
+    export const unauthorized = APIResponse.Utils.createErrorSchemaFactory(401);
+    export const badRequest = APIResponse.Utils.createErrorSchemaFactory(400);
+    export const notFound = APIResponse.Utils.createErrorSchemaFactory(404);
+    export const conflict = APIResponse.Utils.createErrorSchemaFactory(409);
 }
 
 export namespace APIResponse.Types {
