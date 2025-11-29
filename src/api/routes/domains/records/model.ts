@@ -24,10 +24,13 @@ export namespace RecordModel.CreateRecord {
 
     export const Body = createInsertSchema(DB.Schema.additionalDnsRecords, {
         subdomain: z.string()
+            .meta({ title: "Subdomain" })
             .min(1, 'Subdomain must be at least 1 character')
             .max(100, 'Subdomain must be at most 100 characters')
             .regex(/^[a-zA-Z0-9-_.]+$/, 'Subdomain can only contain alphanumeric characters, hyphens, underscores, and dots')
-            .or(z.literal("@")),
+            .or(
+                z.literal("@").meta({ title: "Root Domain" })
+            ),
 
         record_data: DNSRecordSchemasUnion
     })
@@ -39,10 +42,13 @@ export namespace RecordModel.CreateRecord {
 export namespace RecordModel.UpdateRecord {
     export const Body = createUpdateSchema(DB.Schema.additionalDnsRecords, {
         subdomain: z.string()
+
             .min(1, 'Subdomain must be at least 1 character')
             .max(100, 'Subdomain must be at most 100 characters')
             .regex(/^[a-zA-Z0-9-_.]+$/, 'Subdomain can only contain alphanumeric characters, hyphens, underscores, and dots')
-            .or(z.literal("@")),
+            .or(
+                z.literal("@").meta({ title: "Root Domain" })
+            ),
 
         record_data: DNSRecordSchemasUnion
     })

@@ -15,7 +15,7 @@ router.get('/',
     APIRouteSpec.authenticated({
         summary: "Get All DNS Records for Domain",
         description: "Retrieve a list of all additional DNS records for the specified domain owned by the authenticated user.",
-        tags: ["Domains", "DNS Records"],
+        tags: ["DNS Records"],
 
         responses: APIResponseSpec.describeBasic(
             APIResponseSpec.success("Records retrieved successfully", RecordModel.GetRecords.Response)
@@ -40,7 +40,7 @@ router.post('/',
     APIRouteSpec.authenticated({
         summary: "Create DNS Record for Domain",
         description: "Create a new additional DNS record for the specified domain owned by the authenticated user.",
-        tags: ["Domains", "DNS Records"],
+        tags: ["DNS Records"],
 
         responses: APIResponseSpec.describeWithWrongInputs(
             APIResponseSpec.success("DNS record created successfully", z.object({ id: z.number() })),
@@ -117,7 +117,7 @@ router.get('/:recordID',
     APIRouteSpec.authenticated({
         summary: "Get DNS Record",
         description: "Retrieve details of a specific additional DNS record for the specified domain owned by the authenticated user.",
-        tags: ["Domains", "DNS Records"],
+        tags: ["DNS Records"],
 
         responses: APIResponseSpec.describeBasic(
             APIResponseSpec.success("Record retrieved successfully", RecordModel.GetRecord.Response),
@@ -140,7 +140,7 @@ router.put('/:recordID',
     APIRouteSpec.authenticated({
         summary: "Update DNS Record",
         description: "Update a specific additional DNS record for the specified domain owned by the authenticated user.",
-        tags: ["Domains", "DNS Records"],
+        tags: ["DNS Records"],
 
         responses: APIResponseSpec.describeWithWrongInputs(
             APIResponseSpec.successNoData("Record updated successfully"),
@@ -187,7 +187,7 @@ router.delete('/:recordID',
     APIRouteSpec.authenticated({
         summary: "Delete DNS Record",
         description: "Delete a specific additional DNS record for the specified domain owned by the authenticated user.",
-        tags: ["Domains", "DNS Records"],
+        tags: ["DNS Records"],
 
         responses: APIResponseSpec.describeBasic(
             APIResponseSpec.successNoData("Record deleted successfully"),
