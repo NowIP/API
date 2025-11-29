@@ -1,0 +1,1 @@
+ALTER TABLE `domains` ADD `last_ddns_update` integer;

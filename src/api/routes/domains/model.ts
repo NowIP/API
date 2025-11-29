@@ -20,7 +20,14 @@ export namespace DomainModel.CreateDomain {
             .max(50, 'Subdomain must be at most 50 characters')
             .regex(/^[a-zA-Z0-9-]+$/, 'Subdomain can only contain alphanumeric characters and hyphens'),
     })
-    .omit({ id: true, owner_id: true, last_ipv4: true, last_ipv6: true, ddnsv2_api_secret: true })
+    .omit({
+        id: true,
+        owner_id: true,
+        last_ipv4: true,
+        last_ipv6: true,
+        last_ddns_update: true,
+        ddnsv2_api_secret: true
+    })
 
     export type Body = z.infer<typeof Body>;
 }
@@ -39,7 +46,13 @@ export namespace DomainModel.UpdateDomain {
             .max(64, 'API Secret must be at most 64 characters')
             .regex(/^[a-zA-Z0-9-_.]+$/, 'API Secret can only contain alphanumeric characters, hyphens, dots and underscores'),
 
-    }).omit({ id: true, owner_id: true, last_ipv4: true, last_ipv6: true })
+    }).omit({
+        id: true,
+        owner_id: true,
+        last_ipv4: true,
+        last_ipv6: true,
+        last_ddns_update: true
+    })
     .partial();
 
     export type Body = z.infer<typeof Body>;

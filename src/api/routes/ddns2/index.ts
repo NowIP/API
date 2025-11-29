@@ -96,7 +96,8 @@ router.get(
 
 		DB.instance().update(DB.Schema.domains).set({
 			last_ipv4: myip.includes('.') ? myip : domain.last_ipv4,
-			last_ipv6: myip.includes(':') ? myip : domain.last_ipv6
+			last_ipv6: myip.includes(':') ? myip : domain.last_ipv6,
+			last_ddns_update: Math.floor(Date.now() / 1000) // current timestamp in seconds
 		}).where(eq(DB.Schema.domains.id, domain.id)).run();
 
 		return c.text("good " + myip, 200);

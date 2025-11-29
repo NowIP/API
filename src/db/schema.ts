@@ -44,6 +44,7 @@ export const domains = sqliteTable('domains', {
     subdomain: text().notNull().unique(),
     last_ipv4: text(),
     last_ipv6: text(),
+    last_ddns_update: int(),
     ddnsv2_api_secret: text().notNull()
 });
 
