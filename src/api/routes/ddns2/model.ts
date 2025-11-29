@@ -3,7 +3,7 @@ import { z } from "zod";
 export namespace DDNS2Model.Update {
 
 	export const Query = z.object({
-		hostname: z.hostname().min(1).max(50),
+		hostname: z.hostname().min(1).max(253),
 		myip: z.ipv4().or(z.ipv6()),
 		// myipv6: z.ipv6().optional()
 	});
