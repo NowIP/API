@@ -70,6 +70,21 @@ export const DNSRecordDataSchemas = {
 
 } as const;
 
+export const DNSRecordSchemasUnion = z.union([
+    DNSRecordDataSchemas.A,
+    DNSRecordDataSchemas.AAAA,
+    DNSRecordDataSchemas.CNAME,
+
+    DNSRecordDataSchemas.MX,
+
+    DNSRecordDataSchemas.SRV,
+
+    DNSRecordDataSchemas.TXT,
+    DNSRecordDataSchemas.SPF,
+
+    DNSRecordDataSchemas.CAA
+]);
+
 export namespace DNSRecordDataSchemas {
     
     export type Type = {
