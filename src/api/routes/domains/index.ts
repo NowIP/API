@@ -2,9 +2,8 @@ import { Hono } from "hono";
 import { DB } from "../../../db";
 import { APIResponse } from "../../utils/api-res";
 import { eq, and } from "drizzle-orm";
-import { describeRoute, describeResponse, validator as zValidator } from "hono-openapi";
+import { validator as zValidator } from "hono-openapi";
 import { z } from "zod";
-import { createInsertSchema, createSelectSchema, createUpdateSchema } from "drizzle-zod";
 import { randomBytes as crypto_randomBytes } from 'crypto';
 import { router as records_router } from "./records";
 import { APIResponseSpec, APIRouteSpec } from "../../utils/specHelpers";
@@ -47,11 +46,8 @@ router.post('/',
         )
     }),
 
-    zValidator("json", createInsertSchema(DB.Schema.domains, {
-        subdomain: z.string().min(1).max(50),
-    })
-        .omit({ id: true, owner_id: true, last_ipv4: true, last_ipv6: true, ddnsv2_api_secret: true })
-    ),
+    zValidator("json", DomainModel.CreateDomain.Body),
+
     async (c) => {
         const domainData = c.req.valid("json");
         // @ts-ignore
@@ -135,11 +131,8 @@ router.put('/:domainID',
         )
     }),
 
-    zValidator("json", createUpdateSchema(DB.Schema.domains, {
-        subdomain: z.string().min(1).max(50)
-    })
-        .omit({ id: true, owner_id: true, last_ipv4: true, last_ipv6: true })
-    ),
+    zValidator("json", DomainModel.UpdateDomain.Body),
+
     async (c) => {
         const domainData = c.req.valid("json");
         // @ts-ignore

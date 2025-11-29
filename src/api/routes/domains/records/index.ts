@@ -4,7 +4,6 @@ import { z } from "zod";
 import { DB } from "../../../../db";
 import { eq, and } from "drizzle-orm";
 import { APIResponse } from "../../../utils/api-res";
-import { createInsertSchema, createUpdateSchema } from "drizzle-zod";
 import { DNSRecordDataSchemas } from "../../../../dns-server/utils";
 import { APIResponseSpec, APIRouteSpec } from "../../../utils/specHelpers";
 import { RecordModel } from "./model";
@@ -49,11 +48,8 @@ router.post('/',
         )
     }),
 
-    zValidator("json", createInsertSchema(DB.Schema.additionalDnsRecords, {
-        subdomain: z.string().min(1).max(50),
-    })
-        .omit({ id: true, domain_id: true })
-    ),
+    zValidator("json", RecordModel.CreateRecord.Body),
+
     async (c) => {
         // @ts-ignore
         const domain = c.get("domain") as DB.Models.Domain;
@@ -152,9 +148,7 @@ router.put('/:recordID',
         )
     }),
 
-    zValidator("json", createUpdateSchema(DB.Schema.additionalDnsRecords, {
-        subdomain: z.string().min(1).max(50),
-    }).omit({ id: true, domain_id: true })),
+    zValidator("json", RecordModel.UpdateRecord.Body),
 
     async (c) => {
         const recordData = c.req.valid("json");
