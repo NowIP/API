@@ -13,7 +13,7 @@
         "@hono/standard-validator": "^0.2.0",
         "@hono/swagger-ui": "^0.5.2",
         "@scalar/hono-api-reference": "^0.9.25",
-        "better-dns": "1.4.3",
+        "better-dns": "1.4.5",
         "drizzle-orm": "^0.44.7",
         "drizzle-zod": "^0.8.3",
         "hono": "^4.10.6",
