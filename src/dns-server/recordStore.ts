@@ -1,4 +1,4 @@
-import { AbstractDNSRecordStore, DNSRecords, DNSZone } from "better-dns";
+import { AbstractDNSRecordStore, DNSQuery, DNSRecords, DNSZone } from "better-dns";
 import { DB } from "../db";
 import { eq, and } from "drizzle-orm";
 import { DNSRecordDataSchemas } from "./utils";
@@ -87,15 +87,36 @@ export class DNSHybridRecordStore extends AbstractDNSRecordStore {
 
     }
 
-    async getRecords(name: string, type: DNSRecords.TYPES): Promise<DNSRecords.RecordData[]> {
+    async getRecords(name: string, type: DNSRecords.TYPES): Promise<DNSQuery.Response> {
 
-        if (!name.endsWith(this.settings.baseDomain)) {
-            return [];
+        const returnData: DNSQuery.Response = {
+            answers: [],
+            authorities: [],
+            additionals: []
         }
+
+        const baseDomain = this.settings.baseDomain;
+
+        if (!name.endsWith(baseDomain)) {
+            return returnData;
+        }
+
+        returnData.authorities.push({
+            name: baseDomain,
+            type: DNSRecords.TYPE.SOA,
+            ...this.baseZone.records.get(baseDomain)?.get(DNSRecords.TYPE.SOA)?.[0] as DNSRecords.SOA,
+        });
+
+        returnData.authorities.push(...this.baseZone.records.get(baseDomain)?.get(DNSRecords.TYPE.NS)?.map(nsRecord => ({
+            name: baseDomain,
+            type: DNSRecords.TYPE.NS,
+            ...nsRecord
+        })) || []);
 
         const baseDomainRecordData = this.baseZone.getRecords(name, type);
         if (baseDomainRecordData.length > 0) {
-            return baseDomainRecordData;
+            returnData.answers.push(...baseDomainRecordData);
+            return returnData;
         }
 
         const fullSubdomain = name.slice(0, name.length - this.settings.baseDomain.length - 1);
@@ -103,7 +124,7 @@ export class DNSHybridRecordStore extends AbstractDNSRecordStore {
         let [ apexSubdomain, subSubdomain ] = Utils.splitNTimesReverse(fullSubdomain, '.', 1).reverse() as [string | undefined, string | undefined];
         
         if (!apexSubdomain) {
-            return [];
+            return returnData;
         }
 
         const apexDomain = (await DB.instance().select()
@@ -111,26 +132,30 @@ export class DNSHybridRecordStore extends AbstractDNSRecordStore {
             .where(eq(DB.Schema.domains.subdomain, apexSubdomain)).limit(1))[0];
 
         if (!apexDomain) {
-            return [];
+            return returnData;
         }
 
         if (!subSubdomain && (type === DNSRecords.TYPE.A || type === DNSRecords.TYPE.AAAA)) {
 
             if (type === DNSRecords.TYPE.A && apexDomain.last_ipv4) {
-                return [{
+                returnData.answers.push({
                     address: apexDomain.last_ipv4,
                     ttl: 300
-                } satisfies DNSRecords.A as DNSRecords.A];
+                } satisfies DNSRecords.A as DNSRecords.A);
+
+                return returnData;
             }
 
             if (type === DNSRecords.TYPE.AAAA && apexDomain.last_ipv6) {
-                return [{
+                returnData.answers.push({
                     address: apexDomain.last_ipv6,
                     ttl: 300
-                } satisfies DNSRecords.AAAA as DNSRecords.AAAA];
+                } satisfies DNSRecords.AAAA as DNSRecords.AAAA);
+
+                return returnData;
             }
 
-            return [];
+            return returnData;
         }
 
         if (!subSubdomain) {
@@ -149,10 +174,10 @@ export class DNSHybridRecordStore extends AbstractDNSRecordStore {
             ));
 
         if (additionalRecords.length > 0) {
-            return additionalRecords.map(rec => rec.record_data);
+            returnData.answers.push(...additionalRecords.map(rec => rec.record_data));
         }
 
-        return [];
+        return returnData;
     }
 
 }
