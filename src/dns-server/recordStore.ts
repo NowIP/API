@@ -3,6 +3,7 @@ import { DB } from "../db";
 import { eq, and } from "drizzle-orm";
 import { DNSRecordDataSchemas } from "./utils";
 import { Utils } from "../utils";
+import { Logger } from "../utils/logger";
 
 export interface DNSHybridRecordStoreSettings {
     readonly baseDomain: string;
@@ -177,7 +178,7 @@ export class DNSHybridRecordStore extends AbstractDNSRecordStore {
 
         const recordTypeStr = Object.keys(DNSRecords.TYPE).find(key => DNSRecords.TYPE[key as keyof typeof DNSRecords.TYPE] === type);
 
-        console.log(`Looking for additional DNS records for domain ${apexSubdomain}, subdomain ${subSubdomain}, type ${recordTypeStr}`);
+        Logger.debug(`Looking for additional DNS records for domain ${apexSubdomain}, subdomain ${subSubdomain}, type ${recordTypeStr}`);
 
         const additionalRecords = await DB.instance().select()
             .from(DB.Schema.additionalDnsRecords)

@@ -129,8 +129,6 @@ router.get('/:recordID',
         // @ts-ignore
         const record = c.get("record") as DB.Models.AdditionalDNSRecord;
 
-        console.log(record);
-
         return APIResponse.success(c, "Record retrieved successfully", record);
     }
 );

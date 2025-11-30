@@ -108,7 +108,7 @@ router.put('/password',
             eq(DB.Schema.users.id, session.user_id)
         ).run();
 
-        SessionHandler.inValidateAllSessionsForUser(session.user_id);
+        await SessionHandler.inValidateAllSessionsForUser(session.user_id);
 
         return APIResponse.successNoData(c, "Password changed successfully");
     },
@@ -154,7 +154,7 @@ router.delete('/',
         // @ts-ignore
         const session = c.get("session") as DB.Models.Session;
 
-        SessionHandler.inValidateAllSessionsForUser(session.user_id);
+        await SessionHandler.inValidateAllSessionsForUser(session.user_id);
 
         DB.instance().delete(DB.Schema.users).where(
             eq(DB.Schema.users.id, session.user_id)
