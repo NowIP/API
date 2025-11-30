@@ -28,6 +28,8 @@ export class API {
 
 		this.app.use('*', cors({
 			origin: frontendUrl,
+			allowHeaders: ['Content-Type', 'Authorization'],
+			allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
 			maxAge: 600,
 			credentials: true,
 		}))
