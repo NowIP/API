@@ -164,19 +164,18 @@ router.put('/:recordID',
             }
         }
 
-        const recordSchema = DNSRecordDataSchemas[(recordData.type ?? record.type) as keyof typeof DNSRecordDataSchemas];
-        if (!recordSchema) {
-            return APIResponse.badRequest(c, "Unsupported DNS record type");
-        }
+        // const recordSchema = DNSRecordDataSchemas[(recordData.type ?? record.type) as keyof typeof DNSRecordDataSchemas];
+        // if (!recordSchema) {
+        //     return APIResponse.badRequest(c, "Unsupported DNS record type");
+        // }
 
-        const parseResult = recordSchema.safeParse(recordData.record_data ?? record.record_data);
-        if (!parseResult.success) {
-            return APIResponse.badRequest(c, "Invalid DNS record data for type " + (recordData.type ?? record.type));
-        }
+        // const parseResult = recordSchema.safeParse(recordData.record_data ?? record.record_data);
+        // if (!parseResult.success) {
+        //     return APIResponse.badRequest(c, "Invalid DNS record data for type " + (recordData.type ?? record.type));
+        // }
         
-        await DB.instance().update(DB.Schema.additionalDnsRecords).set({
-            ...recordData
-        }).where(eq(DB.Schema.additionalDnsRecords.id, record.id));
+        await DB.instance().update(DB.Schema.additionalDnsRecords).set(recordData)
+            .where(eq(DB.Schema.additionalDnsRecords.id, record.id));
 
         return APIResponse.successNoData(c, "Record updated successfully");
     }
