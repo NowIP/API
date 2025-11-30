@@ -8,7 +8,7 @@
         "@hono/standard-validator": "^0.2.0",
         "@hono/swagger-ui": "^0.5.2",
         "@scalar/hono-api-reference": "^0.9.25",
-        "better-dns": "1.4.2",
+        "better-dns": "1.4.3",
         "drizzle-orm": "^0.44.7",
         "drizzle-zod": "^0.8.3",
         "hono": "^4.10.6",
@@ -104,7 +104,7 @@
 
     "base64-js": ["base64-js@1.5.1", "", {}, "sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA=="],
 
-    "better-dns": ["better-dns@1.4.2", "", { "dependencies": { "@types/dns2": "^2.0.10", "dns2": "^2.1.0" } }, "sha512-ExKHwwsDsc6mrF5/mzeXv5wtdU/l+hDX83E898C4WaRYxvLnigFrD/0I/yH51JWxAsKstnt3sG6TM+EQ6wyMrw=="],
+    "better-dns": ["better-dns@1.4.3", "", { "dependencies": { "@types/dns2": "^2.0.10", "dns2": "^2.1.0" } }, "sha512-4AEAdTcWhW3tYTzB0BKOXqBduWzCD4gS3R3S+5bJAAHNKAdQh6XkFbr3utdNbzR5vIxc8J+wsUKPypPViFQfTw=="],
 
     "better-sqlite3": ["better-sqlite3@12.4.6", "", { "dependencies": { "bindings": "^1.5.0", "prebuild-install": "^7.1.1" } }, "sha512-gaYt9yqTbQ1iOxLpJA8FPR5PiaHP+jlg8I5EX0Rs2KFwNzhBsF40KzMZS5FwelY7RG0wzaucWdqSAJM3uNCPCg=="],
 

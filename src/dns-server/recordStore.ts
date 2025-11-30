@@ -107,11 +107,11 @@ export class DNSHybridRecordStore extends AbstractDNSRecordStore {
             ...this.baseZone.records.get(baseDomain)?.get(DNSRecords.TYPE.SOA)?.[0] as DNSRecords.SOA,
         });
 
-        returnData.authorities.push(...this.baseZone.records.get(baseDomain)?.get(DNSRecords.TYPE.NS)?.map(nsRecord => ({
-            name: baseDomain,
-            type: DNSRecords.TYPE.NS,
-            ...nsRecord
-        })) || []);
+        // returnData.authorities.push(...this.baseZone.records.get(baseDomain)?.get(DNSRecords.TYPE.NS)?.map(nsRecord => ({
+        //     name: baseDomain,
+        //     type: DNSRecords.TYPE.NS,
+        //     ...nsRecord
+        // })) || []);
 
         const baseDomainRecordData = this.baseZone.getRecords(name, type);
         if (baseDomainRecordData.length > 0) {
