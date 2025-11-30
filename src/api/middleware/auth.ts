@@ -13,6 +13,7 @@ export const authMiddleware = createMiddleware(async (c, next) => {
         c.req.path === "/"
     ) {
         await next();
+        return;
     }
 
     const authHeader = c.req.header("Authorization");

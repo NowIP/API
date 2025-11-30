@@ -22,7 +22,7 @@ describe('Search Endpoint', () => {
             }
         }).then(res => res.json()).then(data => data.token);
 
-        const res = await client..$get({
+        const res = await client.$get({
             query: { q: 'hono' },
         })
 

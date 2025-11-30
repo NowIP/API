@@ -2,6 +2,7 @@ import { drizzle } from 'drizzle-orm/bun-sqlite';
 import { Database } from 'bun:sqlite';
 import * as TableSchema from './schema';
 import { randomBytes as crypto_randomBytes } from 'crypto';
+import { Logger } from '../utils/logger';
 
 export type DrizzleDB = ReturnType<typeof drizzle>;
 
@@ -15,7 +16,7 @@ export class DB {
         await this.createInitialSystemConfigsIfNeeded();
         await this.createInitialAdminUserIfNeeded();
 
-        console.log('Database initialized at');
+        Logger.log('Database initialized');
     }
 
     static async createInitialAdminUserIfNeeded() {
@@ -33,7 +34,7 @@ export class DB {
 
         Bun.file('./data/initial_admin_credentials.txt').write(`Username: ${username}\nPassword: ${randomPassword}\n`);
 
-        console.log(`Initial admin user created with username: ${username} and password: ${randomPassword} (also saved to ./data/initial_admin_credentials.txt)`);
+        Logger.log(`Initial admin user created with username: ${username} and password: ${randomPassword} (also saved to ./data/initial_admin_credentials.txt)`);
     }
 
     static async createInitialSystemConfigsIfNeeded() {
