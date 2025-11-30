@@ -87,6 +87,31 @@ export class DNSHybridRecordStore extends AbstractDNSRecordStore {
 
     }
 
+    async getAuthority(name: string): Promise<DNSRecords.ResponseWithoutClass[]> {
+
+        const authorities: DNSRecords.ResponseWithoutClass[] = [];
+
+        const baseDomain = this.settings.baseDomain;
+
+        if (!name.endsWith(baseDomain)) {
+            return [];
+        }
+
+        authorities.push({
+            name: baseDomain,
+            type: DNSRecords.TYPE.SOA,
+            ...this.baseZone.records.get(baseDomain)?.get(DNSRecords.TYPE.SOA)?.[0] as DNSRecords.SOA,
+        });
+
+        authorities.push(...this.baseZone.records.get(baseDomain)?.get(DNSRecords.TYPE.NS)?.map(nsRecord => ({
+            name: baseDomain,
+            type: DNSRecords.TYPE.NS,
+            ...nsRecord
+        })) || []);
+
+        return authorities;
+    }
+
     async getRecords(name: string, type: DNSRecords.TYPES): Promise<DNSQuery.Response> {
 
         const returnData: DNSQuery.Response = {
@@ -100,18 +125,6 @@ export class DNSHybridRecordStore extends AbstractDNSRecordStore {
         if (!name.endsWith(baseDomain)) {
             return returnData;
         }
-
-        returnData.authorities.push({
-            name: baseDomain,
-            type: DNSRecords.TYPE.SOA,
-            ...this.baseZone.records.get(baseDomain)?.get(DNSRecords.TYPE.SOA)?.[0] as DNSRecords.SOA,
-        });
-
-        // returnData.authorities.push(...this.baseZone.records.get(baseDomain)?.get(DNSRecords.TYPE.NS)?.map(nsRecord => ({
-        //     name: baseDomain,
-        //     type: DNSRecords.TYPE.NS,
-        //     ...nsRecord
-        // })) || []);
 
         const baseDomainRecordData = this.baseZone.getRecords(name, type);
         if (baseDomainRecordData.length > 0) {
