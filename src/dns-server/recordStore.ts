@@ -187,7 +187,13 @@ export class DNSHybridRecordStore extends AbstractDNSRecordStore {
             ));
 
         if (additionalRecords.length > 0) {
-            returnData.answers.push(...additionalRecords.map(rec => rec.record_data));
+            returnData.answers.push(...additionalRecords.map(rec => {
+                const data = rec.record_data;
+                if (data.ttl === undefined || data.ttl === null) {
+                    data.ttl = 300;
+                }
+                return data;
+            }));
         }
 
         return returnData;
