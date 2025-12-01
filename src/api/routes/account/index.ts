@@ -154,8 +154,34 @@ router.delete('/',
         // @ts-ignore
         const session = c.get("session") as DB.Models.Session;
 
-        SessionHandler.inValidateAllSessionsForUser(session.user_id);
+        // invalidate all sessions for the user
+        await SessionHandler.inValidateAllSessionsForUser(session.user_id);
 
+        // delete all user data here (e.g., domains, records, etc.) if applicable
+
+        // delete password resets
+        DB.instance().delete(DB.Schema.passwordResets).where(
+            eq(DB.Schema.passwordResets.user_id, session.user_id)
+        ).run();
+
+        // get all domains owned by the user
+        const userDomains = DB.instance().select().from(DB.Schema.domains).where(
+            eq(DB.Schema.domains.owner_id, session.user_id)
+        ).all();
+
+        // delete all records associated with each domain
+        for (const domain of userDomains) {
+            DB.instance().delete(DB.Schema.additionalDnsRecords).where(
+                eq(DB.Schema.additionalDnsRecords.domain_id, domain.id)
+            ).run();
+        }
+
+        // delete all domains owned by the user
+        DB.instance().delete(DB.Schema.domains).where(
+            eq(DB.Schema.domains.owner_id, session.user_id)
+        ).run();
+
+        // finally, delete the user account
         DB.instance().delete(DB.Schema.users).where(
             eq(DB.Schema.users.id, session.user_id)
         ).run();
