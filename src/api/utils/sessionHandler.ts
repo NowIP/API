@@ -24,7 +24,14 @@ export class SessionHandler {
     }
 
     static async isValidSession(session: DB.Models.Session) {
-        if (!session || session.expires_at < Date.now()) {
+        if (!session) {
+            return false;
+        }
+
+        if (session.expires_at < Date.now()) {
+            // Delete expired session
+            await DB.instance().delete(DB.Schema.sessions).where(eq(DB.Schema.sessions.token, session.token));
+
             return false;
         }
 
