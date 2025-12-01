@@ -133,7 +133,8 @@ export class ConfigHandler {
 
     static async loadConfig() {
         if (this.config) return this.config;
-        return this.schema.parse();
+        this.config = this.schema.parse();
+        return this.config;
     }
 
 }
