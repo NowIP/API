@@ -143,7 +143,7 @@ Migrations are tracked under `drizzle/` with `_journal.json` for versioning.
 
 ## Contributing & next steps
 - Keep schema edits in `src/db/schema.ts` and run `bun db:generate` to produce migration files.
-- Regenerate the OpenAPI client by starting the API (`/docs/openapi`) then running `pnpm api-client:generate` from the `APP/` workspace.
+- Regenerate the OpenAPI client by starting the API (`/docs/openapi`) then running `bun run api-client:generate` from the `APP/` workspace.
 - Please open issues/PRs for ideas like pluggable storage engines, rate limiting, or DNSSEC support.
 
 Happy hacking! The NowIP API is the heart of the platform—treat it like critical infrastructure.
