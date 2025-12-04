@@ -12,7 +12,7 @@
     "dependencies": {
         "@hono/standard-validator": "^0.2.0",
         "@scalar/hono-api-reference": "^0.9.25",
-        "better-dns": "^1.6.0",
+        "better-dns": "^1.7.0",
         "drizzle-orm": "^0.44.7",
         "drizzle-zod": "^0.8.3",
         "hono": "^4.10.6",
