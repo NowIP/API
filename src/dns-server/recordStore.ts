@@ -199,4 +199,67 @@ export class DNSHybridRecordStore extends AbstractDNSRecordStore {
         return returnData;
     }
 
+    async getAllRecordsForZone(zoneName: string) {
+        const records: DNSRecords.ResponseWithoutClass[] = [];
+
+        if (zoneName !== this.settings.baseDomain) {
+            return records;
+        }
+
+        for (const [name, typeMap] of this.baseZone.records) {
+            for (const [type, recs] of typeMap) {
+                for (const recordData of recs) {
+                    records.push({
+                        name: name,
+                        type: type,
+                        ...recordData
+                    });
+                }
+            }
+        }
+
+        const domains = await DB.instance().select()
+            .from(DB.Schema.domains);
+
+        for (const domain of domains) {
+            const subdomain = domain.subdomain;
+            if (domain.last_ipv4) {
+                records.push({
+                    name: `${subdomain}.${this.settings.baseDomain}`,
+                    type: DNSRecords.TYPE.A,
+                    address: domain.last_ipv4,
+                    ttl: 300
+                } as (DNSRecords.A & DNSRecords.ResponseWithoutClass));
+            }
+            if (domain.last_ipv6) {
+                records.push({
+                    name: `${subdomain}.${this.settings.baseDomain}`,
+                    type: DNSRecords.TYPE.AAAA,
+                    address: domain.last_ipv6,
+                    ttl: 300
+                } as (DNSRecords.AAAA & DNSRecords.ResponseWithoutClass));
+            }
+            const additionalRecords = await DB.instance().select()
+                .from(DB.Schema.additionalDnsRecords)
+                .where(eq(DB.Schema.additionalDnsRecords.domain_id, domain.id));
+
+            for (const rec of additionalRecords) {
+                records.push({
+                    name: rec.subdomain === "@" ? `${subdomain}.${this.settings.baseDomain}` : `${rec.subdomain}.${subdomain}.${this.settings.baseDomain}`,
+                    type: DNSRecords.TYPE[rec.type],
+                    ...rec.record_data
+                });
+            }
+        }
+
+        return records;
+    }
+
+    async getSlaveSettings(zoneName: string) {
+        if (zoneName !== this.settings.baseDomain) {
+            return null;
+        }
+        return this.baseZone.getSlaveSettings();
+    }
+
 }
