@@ -210,8 +210,6 @@ export class DNSHybridRecordStore extends AbstractDNSRecordStore {
 
         const recordTypeStr = Object.keys(DNSRecords.TYPE).find(key => DNSRecords.TYPE[key as keyof typeof DNSRecords.TYPE] === type);
 
-        console.log(`Looking for additional DNS records for domain ${apexSubdomain}, subdomain ${subSubdomain}, type ${recordTypeStr}`);
-
         const additionalRecords = await DB.instance().select()
             .from(DB.Schema.additionalDnsRecords)
             .where(and(
@@ -349,7 +347,6 @@ export class DNSRecordStoreUtils {
 
         if (existingSerial !== newSerial) {
             baseDomain.getRecords(baseDomain.name, DNSRecords.TYPE.SOA)[0].serial = newSerial;
-            console.log(baseDomain.getRecords(baseDomain.name, DNSRecords.TYPE.SOA)[0].serial)
 
             Logger.debug(`Updated SOA serial to ${newSerial} in DNS record store and pushing NOTIFY to slaves.`);
             const result = await baseDomain.getSlaveSettings()?.sendNOTIFY();
