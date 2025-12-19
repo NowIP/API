@@ -7,6 +7,7 @@ import { APIResponse } from "../../../utils/api-res";
 import { DNSRecordDataSchemas } from "../../../../dns-server/utils";
 import { APIResponseSpec, APIRouteSpec } from "../../../utils/specHelpers";
 import { RecordModel } from "./model";
+import { DNSRecordStoreUtils } from "../../../../dns-server/recordStore";
 
 export const router = new Hono().basePath('/:domainID/records');
 
@@ -79,6 +80,8 @@ router.post('/',
             ...recordData as any,
             domain_id: domain.id
         }).returning().get();
+
+        await DNSRecordStoreUtils.updateSoaSerial();
 
         return APIResponse.created(c, "DNS record created successfully", { id: result.id });
     }   
@@ -177,6 +180,8 @@ router.put('/:recordID',
         await DB.instance().update(DB.Schema.additionalDnsRecords).set(recordData as any)
             .where(eq(DB.Schema.additionalDnsRecords.id, record.id));
 
+        await DNSRecordStoreUtils.updateSoaSerial();
+
         return APIResponse.successNoData(c, "Record updated successfully");
     }
 );
@@ -199,6 +204,8 @@ router.delete('/:recordID',
         const record = c.get("record") as DB.Models.AdditionalDNSRecord;
 
         await DB.instance().delete(DB.Schema.additionalDnsRecords).where(eq(DB.Schema.additionalDnsRecords.id, record.id));
+
+        await DNSRecordStoreUtils.updateSoaSerial();
 
         return APIResponse.successNoData(c, "Record deleted successfully");
     }

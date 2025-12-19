@@ -62,6 +62,7 @@ export namespace DB.Schema {
     export const additionalDnsRecords = TableSchema.additionalDnsRecords;
 
     export const systemConfigs = TableSchema.systemConfigs;
+    export const metadata = TableSchema.metadata;
 }
 
 export namespace DB.Models {
@@ -73,4 +74,5 @@ export namespace DB.Models {
     export type AdditionalDNSRecord = typeof DB.Schema.additionalDnsRecords.$inferSelect;
 
     export type SystemConfig = typeof DB.Schema.systemConfigs.$inferSelect;
+    export type Metadata = typeof DB.Schema.metadata.$inferSelect;
 }

@@ -8,6 +8,7 @@ import { randomBytes as crypto_randomBytes } from 'crypto';
 import { router as records_router } from "./records";
 import { APIResponseSpec, APIRouteSpec } from "../../utils/specHelpers";
 import { DomainModel } from "./model";
+import { DNSRecordStoreUtils } from "../../../dns-server/recordStore";
 
 export const router = new Hono().basePath('/domains');
 
@@ -63,6 +64,8 @@ router.post('/',
             owner_id: session.user_id,
             ddnsv2_api_secret: crypto_randomBytes(16).toString('hex')
         }).returning().get();
+
+        await DNSRecordStoreUtils.updateSoaSerial();
 
         return APIResponse.created(c, "Domain created successfully", { id: result.id });
     }
@@ -142,6 +145,8 @@ router.put('/:domainID',
             ...domainData
         }).where(eq(DB.Schema.domains.id, domain.id));
 
+        await DNSRecordStoreUtils.updateSoaSerial();
+
         return APIResponse.successNoData(c, "Domain updated successfully");
     }
 );
@@ -164,6 +169,8 @@ router.delete('/:domainID',
         const domain = c.get("domain") as DB.Models.Domain;
 
         await DB.instance().delete(DB.Schema.domains).where(eq(DB.Schema.domains.id, domain.id));
+
+        await DNSRecordStoreUtils.updateSoaSerial();
 
         return APIResponse.successNoData(c, "Domain deleted successfully");
     }

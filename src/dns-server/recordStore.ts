@@ -110,6 +110,10 @@ export class DNSHybridRecordStore extends AbstractDNSRecordStore {
 
     }
 
+    private async loadSoaSerial() {
+        this.baseZone.getRecords(this.settings.baseDomain, DNSRecords.TYPE.SOA)[0].serial = DNSRecordStoreUtils.getSoaSerial();
+    }
+
     async getAuthority(name: string): Promise<DNSRecords.ResponseWithoutClass[]> {
 
         const authorities: DNSRecords.ResponseWithoutClass[] = [];
@@ -119,6 +123,8 @@ export class DNSHybridRecordStore extends AbstractDNSRecordStore {
         if (!name.endsWith(baseDomain)) {
             return [];
         }
+
+        await this.loadSoaSerial();
 
         authorities.push({
             name: baseDomain,
@@ -148,6 +154,8 @@ export class DNSHybridRecordStore extends AbstractDNSRecordStore {
         if (!name.endsWith(baseDomain)) {
             return returnData;
         }
+
+        await this.loadSoaSerial();
 
         const baseDomainRecordData = this.baseZone.getRecords(name, type);
         if (baseDomainRecordData.length > 0) {
@@ -229,6 +237,8 @@ export class DNSHybridRecordStore extends AbstractDNSRecordStore {
             return records;
         }
 
+        await this.loadSoaSerial();
+
         for (const [name, typeMap] of this.baseZone.records) {
             for (const [type, recs] of typeMap) {
                 for (const recordData of recs) {
@@ -284,6 +294,40 @@ export class DNSHybridRecordStore extends AbstractDNSRecordStore {
         }
 
         return this.baseZone.getSlaveSettings();
+    }
+
+}
+
+export class DNSRecordStoreUtils {
+
+    private static soaSerialcache: number;
+
+    static getSoaSerial() {
+        return this.soaSerialcache;
+    }
+
+    static async initSoaSerial() {
+        const row = (await DB.instance().select()
+            .from(DB.Schema.metadata)
+            .where(eq(DB.Schema.metadata.key, 'dns_soa_serial'))
+            .limit(1))[0];
+        if (row) {
+            this.soaSerialcache = parseInt(row.value);
+        } else {
+            this.soaSerialcache = DNSZone.Util.nextSoaSerial();
+            await DB.instance().insert(DB.Schema.metadata).values({
+                key: 'dns_soa_serial',
+                value: this.soaSerialcache.toString()
+            });
+        }
+    }
+
+    static async updateSoaSerial() {
+        this.soaSerialcache = DNSZone.Util.nextSoaSerial(this.soaSerialcache);
+        await DB.instance().update(DB.Schema.metadata).set({
+            key: 'dns_soa_serial',
+            value: DNSZone.Util.nextSoaSerial(this.soaSerialcache).toString()
+        });
     }
 
 }

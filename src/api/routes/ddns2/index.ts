@@ -6,6 +6,7 @@ import { validator as honoValidator } from 'hono/validator';
 import { DB } from '../../../db';
 import { eq, and } from 'drizzle-orm';
 import { APIRouteSpec } from '../../utils/specHelpers';
+import { DNSRecordStoreUtils } from '../../../dns-server/recordStore';
 
 export const router = new Hono();
 
@@ -99,6 +100,8 @@ router.get(
 			last_ipv6: myip.includes(':') ? myip : domain.last_ipv6,
 			last_ddns_update: Math.floor(Date.now() / 1000) // current timestamp in seconds
 		}).where(eq(DB.Schema.domains.id, domain.id)).run();
+
+		await DNSRecordStoreUtils.updateSoaSerial();
 
 		return c.text("good " + myip, 200);
 	}

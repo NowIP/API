@@ -69,3 +69,10 @@ export const systemConfigs = sqliteTable('system_configs', {
     value: text().notNull()
 });
 
+/**
+ * @deprecated Use DB.Schema.metadata instead
+ */
+export const metadata = sqliteTable('metadata', {
+    key: text().primaryKey(),
+    value: text().notNull()
+});
