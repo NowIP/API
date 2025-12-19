@@ -349,6 +349,7 @@ export class DNSRecordStoreUtils {
 
         if (existingSerial !== newSerial) {
             baseDomain.getRecords(baseDomain.name, DNSRecords.TYPE.SOA)[0].serial = newSerial;
+            console.log(baseDomain.getRecords(baseDomain.name, DNSRecords.TYPE.SOA)[0].serial)
 
             Logger.debug(`Updated SOA serial to ${newSerial} in DNS record store and pushing NOTIFY to slaves.`);
             await baseDomain.getSlaveSettings()?.sendNOTIFY();
