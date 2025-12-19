@@ -119,6 +119,7 @@ export class DNSHybridRecordStore extends AbstractDNSRecordStore {
                 serial: newSerial
             } as DNSRecords.SOA);
 
+            Logger.debug(`Updated SOA serial to ${newSerial} in DNS record store`);
             await this.baseZone.getSlaveSettings()?.sendNOTIFY();
         }
     }
