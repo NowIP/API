@@ -275,6 +275,7 @@ export class DNSHybridRecordStore extends AbstractDNSRecordStore {
         if (zoneName !== this.settings.baseDomain) {
             return null;
         }
+        console.log('Getting slave settings for zone:', this.baseZone.getSlaveSettings());
         return this.baseZone.getSlaveSettings();
     }
 
