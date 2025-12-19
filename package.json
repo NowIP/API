@@ -23,5 +23,8 @@
         "bun-types": "^1.3.5",
         "drizzle-kit": "^0.31.8"
     },
-    "module": "src/index.ts"
+    "module": "src/index.ts",
+    "patchedDependencies": {
+        "better-dns@2.1.4": "patches/better-dns@2.1.4.patch"
+    }
 }
