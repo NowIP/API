@@ -55,8 +55,6 @@ export class DNSHybridRecordStore extends AbstractDNSRecordStore {
             }
         }
 
-        await DNSRecordStoreUtils.initSoaSerial();
-
     }
 
     async loadCustomRecordsFromFile() {
@@ -110,6 +108,8 @@ export class DNSHybridRecordStore extends AbstractDNSRecordStore {
         } catch (err) {
             throw new Error(`Failed to load custom DNS records from file: ${err}`);
         }
+
+        await DNSRecordStoreUtils.initSoaSerial();
 
     }
 
