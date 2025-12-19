@@ -116,13 +116,11 @@ export class DNSHybridRecordStore extends AbstractDNSRecordStore {
     private async loadSoaSerial() {
         const existingSerial = this.baseZone.getRecords(this.settings.baseDomain, DNSRecords.TYPE.SOA)[0].serial;
         const newSerial = DNSRecordStoreUtils.getSoaSerial();
+        Logger.log(`Current SOA serial: ${existingSerial}, Cached SOA serial: ${newSerial}`);
         if (existingSerial !== newSerial) {
-            this.baseZone.setRecord(this.settings.baseDomain, DNSRecords.TYPE.SOA, {
-                ...this.baseZone.getRecords(this.settings.baseDomain, DNSRecords.TYPE.SOA)[0],
-                serial: newSerial
-            } as DNSRecords.SOA);
+            this.baseZone.getRecords(this.settings.baseDomain, DNSRecords.TYPE.SOA)[0].serial = newSerial;
 
-            Logger.debug(`Updated SOA serial to ${newSerial} in DNS record store`);
+            Logger.log(`Updated SOA serial to ${newSerial} in DNS record store`);
             await this.baseZone.getSlaveSettings()?.sendNOTIFY();
         }
     }
