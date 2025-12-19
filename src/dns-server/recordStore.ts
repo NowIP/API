@@ -111,7 +111,16 @@ export class DNSHybridRecordStore extends AbstractDNSRecordStore {
     }
 
     private async loadSoaSerial() {
-        this.baseZone.getRecords(this.settings.baseDomain, DNSRecords.TYPE.SOA)[0].serial = DNSRecordStoreUtils.getSoaSerial();
+        const existingSerial = this.baseZone.getRecords(this.settings.baseDomain, DNSRecords.TYPE.SOA)[0].serial;
+        const newSerial = DNSRecordStoreUtils.getSoaSerial();
+        if (existingSerial !== newSerial) {
+            this.baseZone.setRecord(this.settings.baseDomain, DNSRecords.TYPE.SOA, {
+                ...this.baseZone.getRecords(this.settings.baseDomain, DNSRecords.TYPE.SOA)[0],
+                serial: newSerial
+            } as DNSRecords.SOA);
+
+            await this.baseZone.getSlaveSettings()?.sendNOTIFY();
+        }
     }
 
     async getAuthority(name: string): Promise<DNSRecords.ResponseWithoutClass[]> {
