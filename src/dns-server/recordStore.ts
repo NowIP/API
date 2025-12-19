@@ -10,6 +10,7 @@ export interface DNSHybridRecordStoreSettings {
     readonly nsSecondaryDomain?: string;
     readonly customRecordsFile?: string;
     readonly slaveServers?: string[];
+    readonly allowedUpdateIPSubnets?: string[];
 }
 
 export class DNSHybridRecordStore extends AbstractDNSRecordStore {
@@ -33,7 +34,7 @@ export class DNSHybridRecordStore extends AbstractDNSRecordStore {
         }
 
         if (this.settings.slaveServers) {
-            this.baseZone.createSlaveSettings(this.settings.slaveServers.map(server => {
+            const slaveSettings = this.baseZone.createSlaveSettings(this.settings.slaveServers.map(server => {
 
                 const [ host, portStr ] = server.split(":");
                 const port = portStr ? parseInt(portStr) : -1;
@@ -45,6 +46,12 @@ export class DNSHybridRecordStore extends AbstractDNSRecordStore {
                     port
                 };
             }));
+
+            if (this.settings.allowedUpdateIPSubnets) {
+                for (const subnet of this.settings.allowedUpdateIPSubnets) {
+                    slaveSettings.addAllowedTransferIP(subnet);
+                }
+            }
         }
 
     }
@@ -275,7 +282,7 @@ export class DNSHybridRecordStore extends AbstractDNSRecordStore {
         if (zoneName !== this.settings.baseDomain) {
             return null;
         }
-        
+
         return this.baseZone.getSlaveSettings();
     }
 

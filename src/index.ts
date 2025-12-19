@@ -32,7 +32,8 @@ class Main {
             nsPrimaryDomain: config.NOWIP_DNS_NS_PRIMARY,
             nsSecondaryDomain: config.NOWIP_DNS_NS_SECONDARY,
             customRecordsFile: config.NOWIP_DNS_CUSTOM_RECORDS_FILE,
-            slaveServers: config.NOWIP_DNS_SLAVE_SERVERS ? config.NOWIP_DNS_SLAVE_SERVERS.split(",") : []
+            slaveServers: config.NOWIP_DNS_SLAVE_SERVERS ? config.NOWIP_DNS_SLAVE_SERVERS.split(",") : [],
+            allowedUpdateIPSubnets: config.NOWIP_DNS_ALLOWED_UPDATE_IP_SUBNETS ? config.NOWIP_DNS_ALLOWED_UPDATE_IP_SUBNETS.split(",") : []
         });
 
         await DNSServer.start();
