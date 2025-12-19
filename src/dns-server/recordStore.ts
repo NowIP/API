@@ -55,6 +55,8 @@ export class DNSHybridRecordStore extends AbstractDNSRecordStore {
             }
         }
 
+        await DNSRecordStoreUtils.initSoaSerial();
+
     }
 
     async loadCustomRecordsFromFile() {
