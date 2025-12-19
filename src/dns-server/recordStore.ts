@@ -3,6 +3,7 @@ import { DB } from "../db";
 import { eq, and } from "drizzle-orm";
 import { DNSRecordDataSchemas } from "./utils";
 import { Utils } from "../utils";
+import { Logger } from "../utils/logger";
 
 export interface DNSHybridRecordStoreSettings {
     readonly baseDomain: string;
