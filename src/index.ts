@@ -31,7 +31,8 @@ class Main {
             baseDomain: config.NOWIP_DNS_DOMAIN,
             nsPrimaryDomain: config.NOWIP_DNS_NS_PRIMARY,
             nsSecondaryDomain: config.NOWIP_DNS_NS_SECONDARY,
-            customRecordsFile: config.NOWIP_DNS_CUSTOM_RECORDS_FILE
+            customRecordsFile: config.NOWIP_DNS_CUSTOM_RECORDS_FILE,
+            slaveServers: config.NOWIP_DNS_SLAVE_SERVERS ? config.NOWIP_DNS_SLAVE_SERVERS.split(",") : []
         });
 
         await DNSServer.start();

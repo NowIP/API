@@ -121,7 +121,8 @@ export class ConfigHandler {
         .add("NOWIP_DNS_DOMAIN", true)
         .add("NOWIP_DNS_NS_PRIMARY", true)
         .add("NOWIP_DNS_NS_SECONDARY", false)
-        .add("NOWIP_DNS_CUSTOM_RECORDS_FILE", false);
+        .add("NOWIP_DNS_CUSTOM_RECORDS_FILE", false)
+        .add("NOWIP_DNS_SLAVE_SERVERS", false);
 
 
     private static config: ParsedConfig | null = null;

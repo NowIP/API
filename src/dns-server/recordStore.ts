@@ -9,6 +9,7 @@ export interface DNSHybridRecordStoreSettings {
     readonly nsPrimaryDomain: string;
     readonly nsSecondaryDomain?: string;
     readonly customRecordsFile?: string;
+    readonly slaveServers?: string[];
 }
 
 export class DNSHybridRecordStore extends AbstractDNSRecordStore {
@@ -29,6 +30,21 @@ export class DNSHybridRecordStore extends AbstractDNSRecordStore {
             this.baseZone.setRecord(this.settings.baseDomain, DNSRecords.TYPE.NS, {
                 host: this.settings.nsSecondaryDomain
             });
+        }
+
+        if (this.settings.slaveServers) {
+            this.baseZone.createSlaveSettings(this.settings.slaveServers.map(server => {
+
+                const [ host, portStr ] = server.split(":");
+                const port = portStr ? parseInt(portStr) : -1;
+                if (isNaN(port) || port <= 0 || port > 65535) {
+                    throw new Error(`Invalid port number in slave server address: ${server}`);
+                }
+                return {
+                    address: host,
+                    port
+                };
+            }));
         }
 
     }
