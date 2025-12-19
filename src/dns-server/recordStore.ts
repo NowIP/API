@@ -341,7 +341,7 @@ export class DNSRecordStoreUtils {
         await this.pushUpdates();
     }
 
-    private async pushUpdates() {
+    private static async pushUpdates() {
         const baseDomain = DNSRecordStoreUtils.getBaseDNSZone();
 
         const existingSerial = baseDomain.getRecords(baseDomain.name, DNSRecords.TYPE.SOA)[0].serial;
