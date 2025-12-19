@@ -346,11 +346,11 @@ export class DNSRecordStoreUtils {
 
         const existingSerial = baseDomain.getRecords(baseDomain.name, DNSRecords.TYPE.SOA)[0].serial;
         const newSerial = DNSRecordStoreUtils.getSoaSerial();
-        Logger.log(`Current SOA serial: ${existingSerial}, Cached SOA serial: ${newSerial}`);
+
         if (existingSerial !== newSerial) {
             baseDomain.getRecords(baseDomain.name, DNSRecords.TYPE.SOA)[0].serial = newSerial;
 
-            Logger.log(`Updated SOA serial to ${newSerial} in DNS record store`);
+            Logger.debug(`Updated SOA serial to ${newSerial} in DNS record store and pushing NOTIFY to slaves.`);
             await baseDomain.getSlaveSettings()?.sendNOTIFY();
         }
     }
