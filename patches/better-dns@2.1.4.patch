@@ -1,0 +1,13 @@
+diff --git a/src/dns-server/recordStore.ts b/src/dns-server/recordStore.ts
+index db403ca..3c7ab80 100644
+--- a/src/dns-server/recordStore.ts
++++ b/src/dns-server/recordStore.ts
+@@ -275,7 +275,7 @@ export class DNSHybridRecordStore extends AbstractDNSRecordStore {
+         if (zoneName !== this.settings.baseDomain) {
+             return null;
+         }
+-        console.log('Getting slave settings for zone:', this.baseZone.getSlaveSettings());
++        
+         return this.baseZone.getSlaveSettings();
+     }
+ 
