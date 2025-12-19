@@ -16,7 +16,14 @@ export interface DNSHybridRecordStoreSettings {
 
 export class DNSHybridRecordStore extends AbstractDNSRecordStore {
 
-    protected readonly baseZone: DNSZone;
+    // protected readonly baseZone: DNSZone;
+
+    protected get baseZone(): DNSZone {
+        return DNSRecordStoreUtils.getBaseDNSZone();
+    }
+    protected set baseZone(value: DNSZone) {
+        DNSRecordStoreUtils.setBaseDNSZone(value);
+    }
 
     constructor(
         protected readonly settings: DNSHybridRecordStoreSettings
@@ -113,18 +120,6 @@ export class DNSHybridRecordStore extends AbstractDNSRecordStore {
 
     }
 
-    private async loadSoaSerial() {
-        const existingSerial = this.baseZone.getRecords(this.settings.baseDomain, DNSRecords.TYPE.SOA)[0].serial;
-        const newSerial = DNSRecordStoreUtils.getSoaSerial();
-        Logger.log(`Current SOA serial: ${existingSerial}, Cached SOA serial: ${newSerial}`);
-        if (existingSerial !== newSerial) {
-            this.baseZone.getRecords(this.settings.baseDomain, DNSRecords.TYPE.SOA)[0].serial = newSerial;
-
-            Logger.log(`Updated SOA serial to ${newSerial} in DNS record store`);
-            await this.baseZone.getSlaveSettings()?.sendNOTIFY();
-        }
-    }
-
     async getAuthority(name: string): Promise<DNSRecords.ResponseWithoutClass[]> {
 
         const authorities: DNSRecords.ResponseWithoutClass[] = [];
@@ -134,8 +129,6 @@ export class DNSHybridRecordStore extends AbstractDNSRecordStore {
         if (!name.endsWith(baseDomain)) {
             return [];
         }
-
-        await this.loadSoaSerial();
 
         authorities.push({
             name: baseDomain,
@@ -165,8 +158,6 @@ export class DNSHybridRecordStore extends AbstractDNSRecordStore {
         if (!name.endsWith(baseDomain)) {
             return returnData;
         }
-
-        await this.loadSoaSerial();
 
         const baseDomainRecordData = this.baseZone.getRecords(name, type);
         if (baseDomainRecordData.length > 0) {
@@ -248,8 +239,6 @@ export class DNSHybridRecordStore extends AbstractDNSRecordStore {
             return records;
         }
 
-        await this.loadSoaSerial();
-
         for (const [name, typeMap] of this.baseZone.records) {
             for (const [type, recs] of typeMap) {
                 for (const recordData of recs) {
@@ -313,6 +302,15 @@ export class DNSRecordStoreUtils {
 
     private static soaSerialcache: number;
 
+    private static baseDNSZone: DNSZone;
+
+    static setBaseDNSZone(zone: DNSZone) {
+        this.baseDNSZone = zone;
+    }
+    static getBaseDNSZone(): DNSZone {
+        return this.baseDNSZone;
+    }
+
     static getSoaSerial() {
         return this.soaSerialcache;
     }
@@ -331,6 +329,7 @@ export class DNSRecordStoreUtils {
                 value: this.soaSerialcache.toString()
             });
         }
+        await this.pushUpdates();
     }
 
     static async updateSoaSerial() {
@@ -339,6 +338,21 @@ export class DNSRecordStoreUtils {
             key: 'dns_soa_serial',
             value: DNSZone.Util.nextSoaSerial(this.soaSerialcache).toString()
         });
+        await this.pushUpdates();
+    }
+
+    private async pushUpdates() {
+        const baseDomain = DNSRecordStoreUtils.getBaseDNSZone();
+
+        const existingSerial = baseDomain.getRecords(baseDomain.name, DNSRecords.TYPE.SOA)[0].serial;
+        const newSerial = DNSRecordStoreUtils.getSoaSerial();
+        Logger.log(`Current SOA serial: ${existingSerial}, Cached SOA serial: ${newSerial}`);
+        if (existingSerial !== newSerial) {
+            baseDomain.getRecords(baseDomain.name, DNSRecords.TYPE.SOA)[0].serial = newSerial;
+
+            Logger.log(`Updated SOA serial to ${newSerial} in DNS record store`);
+            await baseDomain.getSlaveSettings()?.sendNOTIFY();
+        }
     }
 
 }
