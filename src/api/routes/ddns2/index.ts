@@ -29,7 +29,7 @@ router.get(
 					"text/plain": {
 						schema: {
 							type: "string",
-							example: "good 192.168.1.1"
+							example: "good 1.2.3.4"
 						}
 					}
 				}
@@ -79,7 +79,37 @@ router.get(
 			return c.text("badauth", 401);
 		}
 
-		const { hostname, myip } = c.req.valid("query");
+		const body = c.req.valid("query");
+
+		const dataWithOneIP = DDNS2Model.Update.QueryWithOneIP.safeParse(body);
+		const dataWithBothIPs = DDNS2Model.Update.QueryWithBothIPs.safeParse(body);
+
+		const hostname: string = body.hostname;
+		let myipv4: string | null = null;
+		let myipv6: string | null = null;
+
+		if (dataWithOneIP.success) {
+			
+			if (dataWithOneIP.data.myip.includes('.')) {
+
+				myipv4 = dataWithOneIP.data.myip;
+
+			} else if (dataWithOneIP.data.myip.includes(':')) {
+
+				myipv6 = dataWithOneIP.data.myip;
+
+			} else {
+				throw new Error("Invalid IP address format");
+			}
+
+		} else if (dataWithBothIPs.success) {
+			
+			myipv4 = dataWithBothIPs.data.myipv4;
+			myipv6 = dataWithBothIPs.data.myipv6;
+
+		} else {
+			throw new Error("Invalid query parameters");
+		}
 
 		const hostnameSubdomain = hostname.split('.')[0];
 
@@ -96,13 +126,22 @@ router.get(
 		}
 
 		DB.instance().update(DB.Schema.domains).set({
-			last_ipv4: myip.includes('.') ? myip : domain.last_ipv4,
-			last_ipv6: myip.includes(':') ? myip : domain.last_ipv6,
+			last_ipv4: myipv4 ? myipv4 : domain.last_ipv4,
+			last_ipv6: myipv6 ? myipv6 : domain.last_ipv6,
 			last_ddns_update: Math.floor(Date.now() / 1000) // current timestamp in seconds
 		}).where(eq(DB.Schema.domains.id, domain.id)).run();
 
 		await DNSRecordStoreUtils.updateSoaSerial();
 
-		return c.text("good " + myip, 200);
+		let returnMessage = "good ";
+		if (dataWithOneIP.success) {
+			returnMessage += myipv4 || myipv6;
+		} else if (dataWithBothIPs.success) {
+			returnMessage += `${myipv4}, ${myipv6}`;
+		} else {
+			throw new Error("Invalid query parameters");
+		}
+
+		return c.text(returnMessage, 200);
 	}
 );
