@@ -71,7 +71,8 @@ export namespace DDNS2Model.Update {
 
 	export const Query = z.union([
 		QueryWithOneIP,
-		QueryWithBothIPs
+		QueryWithBothIPs,
+		QueryWithBothIPsInOneQuery
 	]);
 	
 	export type Query = z.infer<typeof Query>;
