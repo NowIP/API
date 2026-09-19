@@ -19,6 +19,7 @@ export namespace DDNS2Model.Update {
 			if (!myip1 || !myip2) {
 				return z.NEVER;
 			}
+			console.log("Parsing IP addresses:", myip1, myip2);
 			if (myip1.includes('.') && myip2.includes(':')) {
 
 				const ipv4 = z.ipv4().safeParse(myip1).data;
