@@ -17,10 +17,9 @@ export namespace DDNS2Model.Update {
 
 			const [myip1, myip2] = value.split(',');
 			if (!myip1 || !myip2) {
-				console.log("1, Parsing IP addresses:", myip1, myip2);
 				return z.NEVER;
 			}
-
+			
 			if (myip1.includes('.') && myip2.includes(':')) {
 
 				const ipv4 = z.ipv4().safeParse(myip1).data;
@@ -31,7 +30,6 @@ export namespace DDNS2Model.Update {
 						code: z.ZodIssueCode.custom,
 						message: "Invalid IP address format"
 					});
-					console.log("2, Parsing IP addresses:", ipv4, ipv6);
 					return z.NEVER;
 				}
 
@@ -47,7 +45,6 @@ export namespace DDNS2Model.Update {
 						code: z.ZodIssueCode.custom,
 						message: "Invalid IP address format"
 					});
-					console.log("3, Parsing IP addresses:", ipv4, ipv6);
 					return z.NEVER;
 				}
 
@@ -58,11 +55,13 @@ export namespace DDNS2Model.Update {
 					code: z.ZodIssueCode.custom,
 					message: "Invalid IP address format"
 				});
-				console.log("4, Parsing IP addresses:", myip1, myip2);
 				return z.NEVER;
 			}
 
-		})
+		}).or(z.object({
+			ipv4: z.ipv4().meta({ title: "IPv4 Address" }),
+			ipv6: z.ipv6().meta({ title: "IPv6 Address" })
+		}))
 	});
 	export type QueryWithBothIPsInOneQuery = z.infer<typeof QueryWithBothIPsInOneQuery>;
 

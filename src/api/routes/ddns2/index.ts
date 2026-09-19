@@ -84,7 +84,6 @@ router.get(
 		const dataWithOneIP = DDNS2Model.Update.QueryWithOneIP.safeParse(body);
 		const dataWithBothIPs = DDNS2Model.Update.QueryWithBothIPs.safeParse(body);
 		const dataWithBothIPsInOneQuery = DDNS2Model.Update.QueryWithBothIPsInOneQuery.safeParse(body);
-		console.log(dataWithBothIPsInOneQuery)
 
 		const hostname: string = body.hostname;
 		let myipv4: string | null = null;
