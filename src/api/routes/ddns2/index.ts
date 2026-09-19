@@ -83,6 +83,7 @@ router.get(
 
 		const dataWithOneIP = DDNS2Model.Update.QueryWithOneIP.safeParse(body);
 		const dataWithBothIPs = DDNS2Model.Update.QueryWithBothIPs.safeParse(body);
+		const dataWithBothIPsInOneQuery = DDNS2Model.Update.QueryWithBothIPsInOneQuery.safeParse(body);
 
 		const hostname: string = body.hostname;
 		let myipv4: string | null = null;
@@ -106,6 +107,11 @@ router.get(
 			
 			myipv4 = dataWithBothIPs.data.myipv4;
 			myipv6 = dataWithBothIPs.data.myipv6;
+
+		} else if (dataWithBothIPsInOneQuery.success) {
+
+			myipv4 = dataWithBothIPsInOneQuery.data.myip.ipv4;
+			myipv6 = dataWithBothIPsInOneQuery.data.myip.ipv6;
 
 		} else {
 			throw new Error("Invalid query parameters");
