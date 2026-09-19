@@ -180,29 +180,27 @@ export class DNSHybridRecordStore extends AbstractDNSRecordStore {
         if (!apexDomain) {
             return returnData;
         }
+        
+        if ((!subSubdomain || subSubdomain === "ipv4") && type === DNSRecords.TYPE.A && apexDomain.last_ipv4) {
 
-        if (!subSubdomain && (type === DNSRecords.TYPE.A || type === DNSRecords.TYPE.AAAA)) {
-
-            if (type === DNSRecords.TYPE.A && apexDomain.last_ipv4) {
-                returnData.answers.push({
-                    address: apexDomain.last_ipv4,
-                    ttl: 300
-                } satisfies DNSRecords.A as DNSRecords.A);
-
-                return returnData;
-            }
-
-            if (type === DNSRecords.TYPE.AAAA && apexDomain.last_ipv6) {
-                returnData.answers.push({
-                    address: apexDomain.last_ipv6,
-                    ttl: 300
-                } satisfies DNSRecords.AAAA as DNSRecords.AAAA);
-
-                return returnData;
-            }
+            returnData.answers.push({
+                address: apexDomain.last_ipv4,
+                ttl: 300
+            } satisfies DNSRecords.A as DNSRecords.A);
 
             return returnData;
+
+        } else if ((!subSubdomain || subSubdomain === "ipv6") && type === DNSRecords.TYPE.AAAA && apexDomain.last_ipv6) {
+
+            returnData.answers.push({
+                address: apexDomain.last_ipv6,
+                ttl: 300
+            } satisfies DNSRecords.AAAA as DNSRecords.AAAA);
+
+            return returnData;
+
         }
+
 
         if (!subSubdomain) {
             subSubdomain = "@";
@@ -254,9 +252,18 @@ export class DNSHybridRecordStore extends AbstractDNSRecordStore {
 
         for (const domain of domains) {
             const subdomain = domain.subdomain;
+
             if (domain.last_ipv4) {
+
                 records.push({
                     name: `${subdomain}.${this.settings.baseDomain}`,
+                    type: DNSRecords.TYPE.A,
+                    address: domain.last_ipv4,
+                    ttl: 300
+                } as (DNSRecords.A & DNSRecords.ResponseWithoutClass));
+
+                records.push({
+                    name: `ipv4.${subdomain}.${this.settings.baseDomain}`,
                     type: DNSRecords.TYPE.A,
                     address: domain.last_ipv4,
                     ttl: 300
@@ -269,7 +276,15 @@ export class DNSHybridRecordStore extends AbstractDNSRecordStore {
                     address: domain.last_ipv6,
                     ttl: 300
                 } as (DNSRecords.AAAA & DNSRecords.ResponseWithoutClass));
+
+                records.push({
+                    name: `ipv6.${subdomain}.${this.settings.baseDomain}`,
+                    type: DNSRecords.TYPE.AAAA,
+                    address: domain.last_ipv6,
+                    ttl: 300
+                } as (DNSRecords.AAAA & DNSRecords.ResponseWithoutClass));
             }
+            
             const additionalRecords = await DB.instance().select()
                 .from(DB.Schema.additionalDnsRecords)
                 .where(eq(DB.Schema.additionalDnsRecords.domain_id, domain.id));

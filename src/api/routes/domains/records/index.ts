@@ -27,9 +27,73 @@ router.get('/',
         // @ts-ignore
         const domain = c.get("domain") as DB.Models.Domain;
 
-        const records = DB.instance().select().from(DB.Schema.additionalDnsRecords).where(and(
+        const records: RecordModel.GetRecords.Response = [];
+
+        if (domain.last_ipv4) {
+            records.push({
+                id: 0,
+                domain_id: domain.id,
+                subdomain: "@",
+                type: "A",
+                record_data: {
+                    address: domain.last_ipv4
+                },
+                isSystemRecord: true
+            });
+        }
+        if (domain.last_ipv6) {
+            records.push({
+                id: 0,
+                domain_id: domain.id,
+                subdomain: "@",
+                type: "AAAA",
+                record_data: {
+                    address: domain.last_ipv6
+                },
+                isSystemRecord: true
+            });
+        }
+
+        // Ensure order so check again here
+        if (domain.last_ipv4) {
+            records.push({
+                id: 0,
+                domain_id: domain.id,
+                subdomain: "ipv4",
+                type: "A",
+                record_data: {
+                    address: domain.last_ipv4
+                },
+                isSystemRecord: true
+            });
+        }
+        if (domain.last_ipv6) {
+            records.push({
+                id: 0,
+                domain_id: domain.id,
+                subdomain: "ipv6",
+                type: "AAAA",
+                record_data: {
+                    address: domain.last_ipv6
+                },
+                isSystemRecord: true
+            });
+        }
+
+        const additionalRecords = await DB.instance().select().from(DB.Schema.additionalDnsRecords).where(and(
             eq(DB.Schema.additionalDnsRecords.domain_id, domain.id)
         )).all();
+
+        for (const record of additionalRecords) {
+            records.push({
+                id: record.id,
+                domain_id: record.domain_id,
+                subdomain: record.subdomain,
+                type: record.type,
+                record_data: record.record_data as any,
+                isSystemRecord: false
+            });
+        }
 
         return APIResponse.success(c, "Records retrieved successfully", records);
     }
@@ -57,12 +121,12 @@ router.post('/',
 
         const recordData = c.req.valid("json");
 
-        if (recordData.subdomain === "@") {
+        if (recordData.subdomain === "@" || recordData.subdomain === "ipv4" || recordData.subdomain === "ipv6") {
             if (recordData.type === "CNAME") {
-                return APIResponse.badRequest(c, "The '@' subdomain cannot have CNAME records as it would conflict with the domain apex records");
+                return APIResponse.badRequest(c, "The '@', 'ipv4', and 'ipv6' subdomains cannot have CNAME records as it would conflict with the domain apex records");
             }
             if (recordData.type === "A" || recordData.type === "AAAA") {
-                return APIResponse.badRequest(c, "The '@' subdomain cannot have A or AAAA records as they would conflict with the ddns generated records");
+                return APIResponse.badRequest(c, "The '@', 'ipv4', and 'ipv6' subdomains cannot have A or AAAA records as they would conflict with the ddns generated records");
             }
         }
 
@@ -100,14 +164,24 @@ router.use('/:recordID/*',
         // @ts-ignore
         const domain = c.get("domain") as DB.Models.Domain;
 
-        const record = DB.instance().select().from(DB.Schema.additionalDnsRecords).where(and(
+        const rawRecord = DB.instance().select().from(DB.Schema.additionalDnsRecords).where(and(
             eq(DB.Schema.additionalDnsRecords.id, recordID),
             eq(DB.Schema.additionalDnsRecords.domain_id, domain.id)
         )).get();
 
-        if (!record) {
+        if (!rawRecord) {
             return APIResponse.notFound(c, "Record with specified ID not found");
         }
+
+        const record: RecordModel.GetRecord.Response = {
+            id: rawRecord.id,
+            domain_id: rawRecord.domain_id,
+            subdomain: rawRecord.subdomain,
+            type: rawRecord.type,
+            record_data: rawRecord.record_data as any,
+            isSystemRecord: false
+        };
+
         // @ts-ignore
         c.set("record", record);
 
@@ -156,12 +230,12 @@ router.put('/:recordID',
         // @ts-ignore
         const record = c.get("record") as DB.Models.AdditionalDNSRecord;
 
-        if (recordData.subdomain === "@") {
+        if (recordData.subdomain === "@" || recordData.subdomain === "ipv4" || recordData.subdomain === "ipv6") {
             if (recordData.type === "CNAME") {
-                return APIResponse.badRequest(c, "The '@' subdomain cannot have CNAME records as it would conflict with the domain apex records");
+                return APIResponse.badRequest(c, "The '@', 'ipv4', and 'ipv6' subdomains cannot have CNAME records as it would conflict with the domain apex records");
             }
             if (recordData.type === "A" || recordData.type === "AAAA") {
-                return APIResponse.badRequest(c, "The '@' subdomain cannot have A or AAAA records as they would conflict with the ddns generated records");
+                return APIResponse.badRequest(c, "The '@', 'ipv4', and 'ipv6' subdomains cannot have A or AAAA records as they would conflict with the ddns generated records");
             }
         }
 

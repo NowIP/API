@@ -49,8 +49,10 @@ export namespace RecordModel.GetRecord {
         subdomain: z.union([
             z.string().meta({ title: "Subdomain" }),
             z.literal("@").meta({ title: "Root Domain" })
-        ])
-    });
+        ]),
+    }).extend({
+        isSystemRecord: z.boolean().meta({ title: "Is System Record" })
+    })
 
     const RecordVariants = DNSRecordSchemasUnionWithTypes.map((schema) =>
         BaseRecordSchema.extend(schema.shape).meta({ title: `${schema.shape.type._zod.def.values[0]} Record` })
